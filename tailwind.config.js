@@ -4,22 +4,21 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Kita daftarkan warna "zen" disini
         zen: {
-          500: '#ffc107', // Kuning Emas
-          600: '#e0a800', // Kuning Gelap
-          800: '#252525', // Card Background
-          900: '#1a1a1a', // Background Utama
+          500: '#d9534f', // Warna Merah Khas NovelBin
+          600: '#c9302c',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        serif: ['Merriweather', 'serif'],
+        sans: ['Roboto Condensed', 'sans-serif'],
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

@@ -1,9 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  @apply bg-zen-900 text-gray-200 font-sans;
+  @apply bg-[#F4F4F4] text-[#333] font-sans;
+}
+
+/* Dark Mode Global Styles */
+.dark body {
+  @apply bg-[#121212] text-[#bbb];
 }
