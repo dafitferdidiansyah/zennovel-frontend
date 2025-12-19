@@ -1,22 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
-import { ArrowLeft, Settings, ChevronLeft, ChevronRight, List, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, Settings, ChevronLeft, ChevronRight, List } from 'lucide-react'; // Ganti Home dengan List
 import CommentSection from '../components/CommentSection';
 
 export default function Reader() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [chapter, setChapter] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   
   // Reader Settings
   const [fontSize, setFontSize] = useState(18);
-  const [lineHeight, setLineHeight] = useState(1.8);
+  const [lineHeight, setLineHeight] = useState(1.6);
   const [theme, setTheme] = useState('dark');
 
-  // Themes Config
+  useEffect(() => {
+    setChapter(null);
+    window.scrollTo(0, 0);
+    api.getChapter(id)
+       .then(res => setChapter(res.data))
+       .catch(err => console.error(err));
+  }, [id]);
+
   const themes = {
     light: { bg: '#F4F4F4', text: '#333', ui: '#fff', border: '#ddd' },
     sepia: { bg: '#EAE4D3', text: '#5b4636', ui: '#F4F4E4', border: '#dcc6a0' },
@@ -24,127 +30,88 @@ export default function Reader() {
   };
   const currentTheme = themes[theme];
 
-  // Fetch Data
-  useEffect(() => {
-    setLoading(true);
-    setChapter(null);
-    window.scrollTo(0, 0); // Reset scroll ke atas
-    
-    api.getChapter(id)
-       .then(res => {
-           setChapter(res.data);
-           // Update Judul Tab Browser
-           document.title = `${res.data.title} - ZenNovel`; 
-       })
-       .catch(err => {
-           console.error(err);
-           navigate('/404'); // Redirect ke 404 jika chapter error
-       })
-       .finally(() => setLoading(false));
-
-    // Reset title saat keluar halaman
-    return () => document.title = 'ZenNovel';
-  }, [id, navigate]);
-
-  // Scroll Helpers
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  const scrollToBottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-
-  // Komponen Loading Skeleton
-  if (loading || !chapter) return (
-    <div className="min-h-screen bg-[#232323] p-4 pt-20 max-w-3xl mx-auto space-y-6 animate-pulse">
-        <div className="h-8 bg-gray-700 rounded w-3/4 mx-auto"></div>
-        <div className="space-y-3">
-            {[...Array(10)].map((_, i) => (
-                <div key={i} className="h-4 bg-gray-700 rounded w-full"></div>
-            ))}
-        </div>
-    </div>
-  );
+  if (!chapter) return <div className="text-center py-20 text-[#bbb] bg-[#232323] min-h-screen">Loading chapter...</div>;
 
   return (
     <div 
-      className="min-h-screen transition-colors duration-300 font-sans relative"
+      className="min-h-screen transition-colors duration-300 font-sans"
       style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}
     >
-      {/* 1. HEADER NAVIGASI (Sticky Top) */}
+      {/* 1. HEADER NAVIGASI */}
       <div 
-        className={`fixed top-0 w-full px-4 py-3 flex items-center justify-between shadow-md z-50 transition-transform duration-300 ${showMenu ? 'translate-y-0' : '-translate-y-full'}`}
+        className={`fixed top-0 w-full p-3 flex items-center justify-between shadow-md z-50 transition-transform duration-300 ${showMenu ? 'translate-y-0' : '-translate-y-full'}`}
         style={{ backgroundColor: currentTheme.ui, borderBottom: `1px solid ${currentTheme.border}` }}
       >
-         <div className="flex items-center gap-4 min-w-0">
-             <Link 
-                to={`/novel/${chapter.novel_id}`} 
-                className="p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition"
-                title="Back to Novel"
-             >
+         <div className="flex items-center gap-3">
+             {/* Tombol Back */}
+             <Link to={`/novel/${chapter.novel_id}`} className="p-2 hover:bg-black/10 rounded transition">
                 <ArrowLeft size={20} />
              </Link>
-             <span className="font-bold truncate text-sm md:text-base pr-2">
+             
+             {/* Judul Chapter */}
+             <span className="font-bold truncate max-w-[200px] md:max-w-md text-sm md:text-base">
                 {chapter.title}
              </span>
          </div>
-         <button onClick={() => setShowMenu(false)} className="p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition text-zen-500">
+         <button onClick={() => setShowMenu(false)} className="p-2 hover:bg-black/10 rounded transition text-[#d9534f]">
             <Settings size={20}/>
          </button>
       </div>
 
-      {/* 2. KONTEN BACA */}
-      <div className="max-w-3xl mx-auto px-4 pt-24 pb-32">
+      {/* 2. WRAPPER UTAMA */}
+      <div className="max-w-3xl mx-auto px-4 pt-20 pb-32">
          
-         {/* JUDUL & NAVIGASI ATAS */}
-         <div className="mb-8 border-b border-dashed border-gray-400 dark:border-gray-600 pb-6">
-             <h1 className="text-2xl md:text-3xl font-bold mb-6 text-zen-500 text-center">{chapter.title}</h1>
+         {/* JUDUL CHAPTER DI ATAS TEKS */}
+         <div className="mb-6 border-b border-dashed border-gray-400 dark:border-[#444] pb-4">
+             <h1 className="text-2xl font-bold mb-4 text-[#d9534f]">{chapter.title}</h1>
              
-             {/* Tombol Navigasi Atas (Konsisten) */}
+             {/* Navigasi Kecil di Atas */}
              <div className="flex justify-between items-center gap-2">
                 <button 
                     disabled={!chapter.prev_chapter_id} 
                     onClick={() => navigate(`/read/${chapter.prev_chapter_id}`)} 
-                    className="flex-1 bg-zen-500 text-white py-2 rounded text-sm font-bold hover:bg-zen-600 disabled:opacity-50 disabled:bg-gray-500 transition flex items-center justify-center gap-1"
+                    className="bg-[#5cb85c] text-white px-3 py-1 rounded text-xs hover:bg-[#449d44] disabled:opacity-50"
                 >
-                    <ChevronLeft size={16}/> <span className="hidden sm:inline">Prev</span>
+                    <ChevronLeft size={12} className="inline"/> Prev
                 </button>
 
-                <Link 
-                    to={`/novel/${chapter.novel_id}`} 
-                    className="px-4 py-2 border border-gray-400 dark:border-gray-600 rounded text-gray-600 dark:text-gray-300 hover:bg-zen-500 hover:text-white hover:border-zen-500 transition"
-                    title="Table of Contents"
-                >
-                    <List size={20} />
+                <Link to={`/novel/${chapter.novel_id}`} className="text-xs font-bold border border-gray-400 dark:border-gray-600 px-2 py-1 rounded hover:bg-[#d9534f] hover:text-white hover:border-[#d9534f] transition">
+                    <List size={12} className="inline mb-0.5"/> TOC
                 </Link>
 
                 <button 
                     disabled={!chapter.next_chapter_id} 
                     onClick={() => navigate(`/read/${chapter.next_chapter_id}`)} 
-                    className="flex-1 bg-zen-500 text-white py-2 rounded text-sm font-bold hover:bg-zen-600 disabled:opacity-50 disabled:bg-gray-500 transition flex items-center justify-center gap-1"
+                    className="bg-[#5cb85c] text-white px-3 py-1 rounded text-xs hover:bg-[#449d44] disabled:opacity-50"
                 >
-                    <span className="hidden sm:inline">Next</span> <ChevronRight size={16}/>
+                    Next <ChevronRight size={12} className="inline"/>
                 </button>
              </div>
          </div>
 
-         {/* TEXT NOVEL */}
+         {/* 3. TEKS NOVEL */}
          <div 
-            className="prose dark:prose-invert max-w-none mb-12 select-none md:select-text cursor-pointer"
-            style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
+            className="prose dark:prose-invert max-w-none mb-10 select-none md:select-text"
+            style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight, fontFamily: 'Arial, sans-serif' }}
             dangerouslySetInnerHTML={{ __html: chapter.content }}
             onClick={() => setShowMenu(!showMenu)} 
          />
 
-         {/* NAVIGASI BAWAH */}
-         <div className="flex justify-between items-center gap-3 mb-10">
+         {/* 4. NAVIGASI BAWAH (BODY) */}
+         <div className="flex justify-between items-center gap-2 mb-8">
             <button 
               disabled={!chapter.prev_chapter_id}
               onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.prev_chapter_id}`); }}
-              className="flex-1 py-3 border border-gray-400 dark:border-gray-600 rounded font-bold hover:bg-zen-500 hover:text-white hover:border-zen-500 transition disabled:opacity-30 flex items-center justify-center gap-2"
+              className="flex-1 bg-[#5cb85c] text-white py-2 rounded text-sm font-bold hover:bg-[#449d44] transition disabled:opacity-50 flex items-center justify-center gap-1"
             >
-              <ChevronLeft size={18}/> Prev
+              <ChevronLeft size={16}/> Prev
             </button>
             
+            {/* TOMBOL TOC DI TENGAH */}
             <Link 
-                to={`/novel/${chapter.novel_id}`} 
-                className="py-3 px-4 border border-gray-400 dark:border-gray-600 rounded hover:bg-zen-500 hover:text-white hover:border-zen-500 transition"
+                to={`/novel/${chapter.novel_id}`}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-600 dark:text-gray-300 hover:bg-[#d9534f] hover:text-white hover:border-[#d9534f] transition"
+                title="Table of Contents"
             >
                 <List size={20} />
             </Link>
@@ -152,75 +119,62 @@ export default function Reader() {
             <button 
               disabled={!chapter.next_chapter_id}
               onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.next_chapter_id}`); }}
-              className="flex-1 py-3 border border-gray-400 dark:border-gray-600 rounded font-bold hover:bg-zen-500 hover:text-white hover:border-zen-500 transition disabled:opacity-30 flex items-center justify-center gap-2"
+              className="flex-1 bg-[#5cb85c] text-white py-2 rounded text-sm font-bold hover:bg-[#449d44] transition disabled:opacity-50 flex items-center justify-center gap-1"
             >
-              Next <ChevronRight size={18}/>
+              Next <ChevronRight size={16}/>
             </button>
          </div>
 
-         {/* KOMENTAR */}
+         {/* 5. KOMENTAR */}
          <CommentSection chapterId={chapter.id} />
       
       </div>
 
-      {/* 3. FLOATING SCROLL BUTTONS (Kanan Bawah) */}
-      <div className="fixed bottom-24 right-4 flex flex-col gap-2 z-40 opacity-70 hover:opacity-100 transition">
-          <button 
-            onClick={scrollToTop} 
-            className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full shadow-lg hover:bg-zen-500 hover:text-white transition"
-          >
-            <ArrowUp size={20} />
-          </button>
-          <button 
-            onClick={scrollToBottom} 
-            className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full shadow-lg hover:bg-zen-500 hover:text-white transition"
-          >
-            <ArrowDown size={20} />
-          </button>
-      </div>
-
-      {/* 4. FOOTER SETTINGS PANEL */}
+      {/* 6. FOOTER SETTINGS PANEL */}
       <div 
-        className={`fixed bottom-0 w-full p-5 shadow-[0_-4px_10px_rgba(0,0,0,0.3)] z-50 transition-transform duration-300 ${showMenu ? 'translate-y-0' : 'translate-y-full'}`}
+        className={`fixed bottom-0 w-full p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)] z-50 transition-transform duration-300 ${showMenu ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ backgroundColor: currentTheme.ui, borderTop: `1px solid ${currentTheme.border}` }}
       >
-         <div className="max-w-3xl mx-auto space-y-5">
-             
-             {/* Font Size & Line Height */}
-             <div className="flex items-center justify-between gap-4">
-                 <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#333] p-1 rounded-lg">
-                     <button onClick={() => setFontSize(s => Math.max(14, s-2))} className="w-8 h-8 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 rounded font-bold">-</button>
-                     <span className="w-8 text-center text-sm font-mono">{fontSize}</span>
-                     <button onClick={() => setFontSize(s => Math.min(32, s+2))} className="w-8 h-8 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 rounded font-bold">+</button>
-                 </div>
-                 
+
+         {/* SETTING FONT & THEME */}
+         <div className="max-w-3xl mx-auto space-y-4 pt-4 border-t border-gray-300 dark:border-gray-600">
+             <div className="flex items-center justify-between">
                  <div className="flex items-center gap-2">
-                     <span className="text-xs font-bold uppercase opacity-60">Line</span>
+                     <span className="text-xs font-bold uppercase opacity-70 w-12">Font</span>
+                     <button onClick={() => setFontSize(s => Math.max(14, s-2))} className="px-3 py-1 bg-gray-200 dark:bg-[#333] rounded">-</button>
+                     <span className="text-sm w-6 text-center">{fontSize}</span>
+                     <button onClick={() => setFontSize(s => Math.min(32, s+2))} className="px-3 py-1 bg-gray-200 dark:bg-[#333] rounded">+</button>
+                 </div>
+                 <div className="flex items-center gap-2">
+                     <span className="text-xs font-bold uppercase opacity-70">Line</span>
                      <select 
                         value={lineHeight} 
                         onChange={(e) => setLineHeight(e.target.value)}
-                        className="bg-gray-100 dark:bg-[#333] text-sm py-1.5 px-2 rounded outline-none border border-transparent focus:border-zen-500"
+                        className="bg-gray-200 dark:bg-[#333] text-xs p-1 rounded outline-none"
                      >
-                        <option value="1.4">Compact</option>
-                        <option value="1.8">Normal</option>
-                        <option value="2.2">Loose</option>
+                        <option value="1.4">140%</option>
+                        <option value="1.6">160%</option>
+                        <option value="1.8">180%</option>
+                        <option value="2.0">200%</option>
                      </select>
                  </div>
              </div>
              
-             {/* Theme Selection */}
-             <div className="flex gap-2">
-                 {['light', 'sepia', 'dark'].map(t => (
-                     <button 
-                        key={t} 
-                        onClick={() => setTheme(t)}
-                        className={`flex-1 py-2 rounded text-xs font-bold capitalize border-2 transition ${theme === t ? 'border-zen-500 text-zen-500 bg-zen-500/10' : 'border-gray-200 dark:border-gray-600 opacity-60'}`}
-                     >
-                        {t}
-                     </button>
-                 ))}
+             <div className="flex items-center gap-2">
+                 <span className="text-xs font-bold uppercase opacity-70 w-12">Color</span>
+                 <div className="flex gap-2 flex-1">
+                     {['light', 'sepia', 'dark'].map(t => (
+                         <button 
+                            key={t} 
+                            onClick={() => setTheme(t)}
+                            className={`flex-1 py-1 rounded text-xs font-bold capitalize border ${theme === t ? 'border-[#d9534f] text-[#d9534f]' : 'border-transparent opacity-70'}`}
+                            style={{ backgroundColor: themes[t].bg, color: theme === t ? '#d9534f' : themes[t].text }}
+                         >
+                            {t}
+                         </button>
+                     ))}
+                 </div>
              </div>
-
          </div>
       </div>
     </div>
