@@ -30,4 +30,7 @@ export const api = {
       `${API_URL}/comments/delete/${commentId}/`,
       { headers: { Authorization: `Bearer ${token}` } }
   ),
+  // Ratings
+  rateNovel: (id, score, token) => axios.post(`${API_URL}/novels/${id}/rate/`, { score }, { headers: { Authorization: `Bearer ${token}` } }),
+  getNovelsByTag: (slug) => axios.get(`${API_URL}/tag/${slug}/`),
 };
