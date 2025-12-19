@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Flame, Clock, Zap, LogOut, User } from 'lucide-react';
-
-const BACKEND_URL = "https://dafit29.pythonanywhere.com";
+import { api, BASE_URL } from '../api'; // Import BASE_URL untuk gambar
 
 export default function Home() {
   const [data, setData] = useState({ hot: [], latest: [], completed: [] });
@@ -80,7 +78,7 @@ export default function Home() {
               <Link to={`/novel/${novel.id}`} key={novel.id} className="group relative">
                 <div className="aspect-[2/3] overflow-hidden rounded shadow-md bg-gray-200 dark:bg-gray-800">
                    <img 
-                      src={novel.cover ? `${BACKEND_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
+                      src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
                       className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
                    />
                    <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-br font-bold shadow-sm">HOT</div>
@@ -106,7 +104,7 @@ export default function Home() {
               {data.latest.map(novel => (
                 <div key={novel.id} className="flex gap-4 p-3 bg-white dark:bg-[#232323] rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
                   <div className="w-16 h-24 flex-shrink-0 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden">
-                    <img src={novel.cover ? `${BACKEND_URL}${novel.cover}` : 'https://placehold.co/400x600'} className="w-full h-full object-cover"/>
+                    <img src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} className="w-full h-full object-cover"/>
                   </div>
                   
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -156,7 +154,7 @@ export default function Home() {
                    {data.completed.map(novel => (
                       <Link to={`/novel/${novel.id}`} key={novel.id} className="flex gap-3 group">
                          <div className="w-12 h-16 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0">
-                            <img src={novel.cover ? `${BACKEND_URL}${novel.cover}` : 'https://placehold.co/400x600'} className="w-full h-full object-cover"/>
+                            <img src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} className="w-full h-full object-cover"/>
                          </div>
                          <div>
                             <h4 className="text-xs font-bold group-hover:text-green-500 text-gray-800 dark:text-gray-200 line-clamp-2">{novel.title}</h4>

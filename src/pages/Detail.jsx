@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { api } from '../api';
+import { api, BASE_URL } from '../api'; // Import BASE_URL untuk gambar
 import { BookOpen, Star, ArrowLeft, Bookmark, Zap, LogOut, User } from 'lucide-react';
 
-const BACKEND_URL = "https://dafit29.pythonanywhere.com";
 
 export default function Detail() {
   const { id } = useParams();
@@ -72,7 +71,7 @@ export default function Detail() {
       {/* HEADER GAMBAR BESAR */}
       <div className="relative h-72 w-full overflow-hidden">
         <img 
-          src={novel.cover ? `${BACKEND_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
+          src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
           className="w-full h-full object-cover opacity-60 blur-sm transform scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#F4F4F4] dark:from-[#151515] via-[#151515]/60 to-transparent" />
@@ -84,7 +83,7 @@ export default function Detail() {
             {/* Cover Depan */}
             <div className="w-44 mx-auto md:mx-0 flex-shrink-0 rounded-lg shadow-2xl overflow-hidden border-4 border-white dark:border-[#232323] bg-gray-200 relative group">
                  <img 
-                    src={novel.cover ? `${BACKEND_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
+                    src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
                     className="w-full h-full object-cover"
                 />
             </div>

@@ -5,6 +5,7 @@ import Reader from './pages/Reader';
 import Library from './pages/Library'; // <--- Import Library
 import Login from './pages/Login';       // <--- Import
 import Register from './pages/Register'; // <--- Import
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
           {/* RUTE AUTH */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          {/* Menangkap semua URL yang tidak terdaftar */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </div>

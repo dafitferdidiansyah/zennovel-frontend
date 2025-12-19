@@ -1,33 +1,33 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8000/api';
+// Ganti ini saja jika URL berubah
+export const BASE_URL = 'https://dafit29.pythonanywhere.com'; 
+export const API_URL = `${BASE_URL}/api`;
 
 export const api = {
-  // Novel Data
-  getHomeData: () => axios.get(`${BASE_URL}/home/`),
-  getNovels: () => axios.get(`${BASE_URL}/novels/`),
-  getDetail: (id) => axios.get(`${BASE_URL}/novels/${id}/`),
-  getChapter: (id) => axios.get(`${BASE_URL}/chapters/${id}/`),
+  // Gunakan API_URL disini
+  getHomeData: () => axios.get(`${API_URL}/home/`),
+  getNovels: () => axios.get(`${API_URL}/novels/`),
+  getDetail: (id) => axios.get(`${API_URL}/novels/${id}/`),
+  getChapter: (id) => axios.get(`${API_URL}/chapters/${id}/`),
   
-  // User Data (Butuh Token)
-  login: (creds) => axios.post(`${BASE_URL}/token/`, creds),
-  register: (data) => axios.post(`${BASE_URL}/register/`, data), // <--- TAMBAHAN
+  // Auth
+  login: (creds) => axios.post(`${API_URL}/token/`, creds),
+  register: (data) => axios.post(`${API_URL}/register/`, data),
   
   // User Features
-  getBookmarks: (token) => axios.get(`${BASE_URL}/bookmarks/`, { headers: { Authorization: `Bearer ${token}` } }),
-  toggleBookmark: (id, token) => axios.post(`${BASE_URL}/bookmarks/toggle/${id}/`, {}, { headers: { Authorization: `Bearer ${token}` } }),
-
-  // Comments System
-  getComments: (chapterId) => axios.get(`${BASE_URL}/comments/${chapterId}/`),
+  getBookmarks: (token) => axios.get(`${API_URL}/bookmarks/`, { headers: { Authorization: `Bearer ${token}` } }),
+  toggleBookmark: (id, token) => axios.post(`${API_URL}/bookmarks/toggle/${id}/`, {}, { headers: { Authorization: `Bearer ${token}` } }),
   
+  // Comments
+  getComments: (chapterId) => axios.get(`${API_URL}/comments/${chapterId}/`),
   postComment: (chapterId, text, token) => axios.post(
-      `${BASE_URL}/comments/post/${chapterId}/`, 
+      `${API_URL}/comments/post/${chapterId}/`, 
       { text: text }, 
       { headers: { Authorization: `Bearer ${token}` } }
   ),
-
   deleteComment: (commentId, token) => axios.delete(
-      `${BASE_URL}/comments/delete/${commentId}/`,
+      `${API_URL}/comments/delete/${commentId}/`,
       { headers: { Authorization: `Bearer ${token}` } }
   ),
 };

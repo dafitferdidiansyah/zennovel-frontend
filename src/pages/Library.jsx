@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api';
+import { api, BASE_URL } from '../api'; // Import BASE_URL untuk gambar
 import { Link, useNavigate } from 'react-router-dom';
 import { Bookmark, ArrowLeft, Zap, LogOut, BookOpen, User } from 'lucide-react';
 
-const BACKEND_URL = "https://dafit29.pythonanywhere.com";
 
 export default function Library() {
   const [novels, setNovels] = useState([]);
@@ -103,7 +102,7 @@ export default function Library() {
               <Link to={`/novel/${novel.id}`} key={novel.id} className="group relative">
                 <div className="aspect-[2/3] overflow-hidden rounded shadow-md bg-gray-200 dark:bg-gray-800">
                    <img 
-                      src={novel.cover ? `${BACKEND_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
+                      src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
                       className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
                    />
                 </div>
