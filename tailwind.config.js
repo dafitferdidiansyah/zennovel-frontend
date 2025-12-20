@@ -4,21 +4,22 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        // Ini Warna Dasar Merah NovelBin yang Anda minta
         zen: {
-          500: '#d9534f', // Warna Merah Khas NovelBin
-          600: '#c9302c',
+          500: '#d9534f', // Merah Utama
+          600: '#c9302c', // Merah Hover (lebih gelap)
         }
       },
       fontFamily: {
-        sans: ['Roboto Condensed', 'sans-serif'],
+        sans: ['Roboto Condensed', 'sans-serif'], // Opsional: Biar font mirip NovelBin
       }
     },
   },
   plugins: [
-    require('@tailwindcss/typography'),
+    require('@tailwindcss/typography'), // Pastikan ini ada untuk halaman baca (prose)
   ],
+  darkMode: 'class',
 }

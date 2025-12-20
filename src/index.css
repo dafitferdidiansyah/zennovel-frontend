@@ -1,14 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-[#F4F4F4] text-[#333] font-sans;
+@layer base {
+  body {
+    /* Warna Dasar Background & Text */
+    @apply bg-[#F4F4F4] text-[#333] dark:bg-[#151515] dark:text-[#bbb] transition-colors duration-300;
+  }
 }
 
-/* Dark Mode Global Styles */
-.dark body {
-  @apply bg-[#121212] text-[#bbb];
+/* Custom Scrollbar biar lebih rapi (Opsional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-700 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-zen-500;
 }

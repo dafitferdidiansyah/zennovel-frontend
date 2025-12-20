@@ -38,9 +38,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
            <div className="flex items-center gap-2">
              <Zap className="text-zen-500 fill-current" />
-             <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-white">
-               Zen<span className="text-zen-500">Novel</span>
-             </h1>
+            <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+                Zen<span className="text-zen-500">Novel</span> {/* <--- Ini yang bikin merah */}
+            </h1>
            </div>
            
            <div className="flex items-center gap-6 text-sm font-bold">
