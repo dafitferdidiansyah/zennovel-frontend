@@ -20,9 +20,9 @@ export default function ReaderFooter({ showMenu, fontSize, setFontSize, lineHeig
                   className="bg-black/5 dark:bg-white/10 py-2 px-4 rounded-lg border border-black/10 dark:border-white/10 outline-none focus:border-zen-500 text-sm"
                   style={{ color: theme.text }}
                >
-                  <option value="1.4">Compact</option>
-                  <option value="1.8">Comfortable</option>
-                  <option value="2.2">Loose</option>
+                 <option value="1.4" style={{ color: 'black' }}>Compact</option>
+                  <option value="1.8" style={{ color: 'black' }}>Comfortable</option>
+                  <option value="2.2" style={{ color: 'black' }}>Loose</option>
                </select>
            </div>
 
