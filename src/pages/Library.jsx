@@ -40,7 +40,7 @@ export default function Library() {
     <div className="min-h-screen pb-20 bg-[#F4F4F4] dark:bg-[#151515] text-[#333] dark:text-[#bbb] font-sans transition-colors duration-300">
       
       {/* NAVBAR */}
-      <nav className="bg-white dark:bg-[#232323] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm mb-6">
+      <nav className="bg-white dark:bg-[#232323] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 shadow-sm mb-6">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
            <div className="flex items-center gap-2">
              <Link to="/" className="text-gray-600 dark:text-gray-300 hover:text-zen-500">

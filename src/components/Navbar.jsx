@@ -119,7 +119,7 @@ const Navbar = ({ theme, toggleTheme }) => {
                 {/* Overlay transparan (Opsional: untuk menutup menu jika klik di luar) */}
                 {isDropdownOpen && (
                   <div 
-                    className="fixed inset-0 z-40" 
+                    className="fixed inset-0 z-70" 
                     onClick={() => setIsDropdownOpen(false)}
                   ></div>
                 )}

@@ -73,12 +73,12 @@ export default function Reader() {
          </div>
 
          {/* CONTENT */}
-<div 
-  className={`prose max-w-none mb-12 select-none md:select-text cursor-pointer leading-relaxed ${themeMode === 'dark' ? 'prose-invert' : ''}`}
-  style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
-  dangerouslySetInnerHTML={{ __html: chapter.content }}
-  onClick={() => setShowMenu(!showMenu)} 
-/>
+        <div 
+          className={`prose max-w-none mb-12 select-none md:select-text cursor-pointer leading-relaxed ${themeMode === 'dark' ? 'prose-invert' : ''}`}
+          style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
+          dangerouslySetInnerHTML={{ __html: chapter.content }}
+          onClick={() => setShowMenu(!showMenu)} 
+        />
 
          {/* NAVIGASI BAWAH */}
          <div className="flex items-center gap-3 mb-10 pt-8 border-t border-dashed border-gray-400 dark:border-gray-700">
