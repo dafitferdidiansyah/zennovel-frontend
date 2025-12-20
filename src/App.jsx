@@ -1,38 +1,56 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import MainLayout from './layouts/MainLayout'; // Layout baru
-import Home from './pages/Home';
-import Detail from './pages/Detail';
-import Reader from './pages/Reader';
-import Library from './pages/Library';
-import SearchPage from './pages/SearchPage';
-import TagPage from './pages/TagPage';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import NotFound from './pages/NotFound';
+// src/App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout";
+import Home from "./pages/Home";
+import Detail from "./pages/Detail";
+import Reader from "./pages/Reader";
+import Library from "./pages/Library";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import NotFound from "./pages/NotFound";
+import SearchPage from "./pages/SearchPage";
+import TagPage from "./pages/TagPage";
+import { useEffect, useState } from "react";
 
 function App() {
-  return (
-     
-      <BrowserRouter>
-        <Routes>
-          {/* Halaman dengan Navbar & Footer */}
-          <Route element={<MainLayout />}>
-             <Route path="/" element={<Home />} />
-             <Route path="/library" element={<Library />} />
-             <Route path="/search" element={<SearchPage />} />
-             <Route path="/tag/:slug" element={<TagPage />} />
-             {/* Detail juga pakai layout biar ada footer */}
-             <Route path="/novel/:id" element={<Detail />} /> 
-          </Route>
+  // State untuk tema global
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
-          {/* Halaman Standalone (Tanpa Navbar/Footer Standar) */}
-          <Route path="/read/:id" element={<Reader />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  // Fungsi toggle yang akan dipass ke Navbar
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Pass props theme dan toggleTheme ke MainLayout */}
+        <Route path="/" element={<MainLayout theme={theme} toggleTheme={toggleTheme} />}>
+          <Route index element={<Home />} />
+          <Route path="novel/:id" element={<Detail />} />
+          <Route path="library" element={<Library />} />
+          <Route path="search" element={<SearchPage />} />
+          {/* PERUBAHAN DISINI: Pisahkan Route Tag dan Genre */}
+          <Route path="tag/:tagName" element={<TagPage />} />
+          <Route path="genre/:genreName" element={<TagPage />} />
+
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    
+        </Route>
+        <Route path="/read/:id/:chapterId" element={<Reader />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

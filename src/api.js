@@ -1,14 +1,18 @@
 import axios from 'axios';
 
 // Ganti ini saja jika URL berubah
-export const BASE_URL = 'https://dafit29.pythonanywhere.com'; 
+export const BASE_URL = 'http://localhost:8000'; 
 export const API_URL = `${BASE_URL}/api`;
 
 export const api = {
   // Gunakan API_URL disini
   getHomeData: () => axios.get(`${API_URL}/home/`),
   getNovels: (params) => axios.get(`${API_URL}/novels/`, { params }),
-  getDetail: (id) => axios.get(`${API_URL}/novels/${id}/`),
+  getDetail: (id, token) => {
+    // Tambahkan header Authorization jika token ada
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+    return axios.get(`${API_URL}/novels/${id}`, config);
+},
   getChapter: (id) => axios.get(`${API_URL}/chapters/${id}/`),
   
   // Auth
@@ -32,5 +36,7 @@ export const api = {
   ),
   // Ratings
   rateNovel: (id, score, token) => axios.post(`${API_URL}/novels/${id}/rate/`, { score }, { headers: { Authorization: `Bearer ${token}` } }),
-  getNovelsByTag: (slug) => axios.get(`${API_URL}/tag/${slug}/`),
+  getNovelsByTag: (tag) => axios.get(`${API_URL}/novels/?tag=${tag}`),
+  getNovelsByGenre: (genre) => axios.get(`${API_URL}/novels/?genre=${genre}`),
+  getGenres: () => axios.get(`${BASE_URL}/api/genres/`),
 };

@@ -1,25 +1,37 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Flame, Clock, Zap, LogOut, User , Search} from 'lucide-react';
-import { api, BASE_URL } from '../api'; // Import BASE_URL untuk gambar
-
+import { api, BASE_URL } from '../api'; 
 
 export default function Home() {
   const [data, setData] = useState({ hot: [], latest: [], completed: [] });
+  // UBAH: Inisialisasi state genres kosong
+  const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Cek status login
     const token = localStorage.getItem('access_token');
     setIsLoggedIn(!!token);
 
-    // Ambil data home
-    api.getHomeData()
-      .then(res => setData(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+    // UBAH: Ambil data Home DAN Genres secara paralel
+    const fetchData = async () => {
+        try {
+            const [homeRes, genreRes] = await Promise.all([
+                api.getHomeData(),
+                api.getGenres()
+            ]);
+            setData(homeRes.data);
+            setGenres(genreRes.data); // Set data genre dari API
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchData();
   }, []);
 
   const handleLogout = () => {
@@ -34,7 +46,6 @@ export default function Home() {
   return (
     <div className="min-h-screen pb-20 bg-[#F4F4F4] dark:bg-[#151515] text-[#333] dark:text-[#bbb] transition-colors duration-300 font-sans">
       
-
       <div className="max-w-6xl mx-auto px-4 mt-6">
         
         {/* HOT NOVEL GRID */}
@@ -86,8 +97,14 @@ export default function Home() {
                             </h3>
                         </Link>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                            <span className="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600">{novel.genre}</span>
-                            <span>•</span>
+<Link 
+        to={`/genre/${novel.genre}`} 
+        className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-xs rounded hover:bg-zen-500 hover:text-white cursor-pointer transition text-gray-600 dark:text-gray-300 hover:text-black"
+        onClick={(e) => e.stopPropagation()} // Mencegah klik tembus jika ada link parent
+    >
+        {novel.genre}
+    </Link>
+                                <span>•</span>
                             <span className="text-zen-500">{novel.author}</span>
                         </div>
                     </div>
@@ -110,11 +127,18 @@ export default function Home() {
              <div className="bg-white dark:bg-[#232323] p-4 rounded shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="font-bold border-b border-gray-300 dark:border-gray-600 pb-2 mb-3 text-gray-800 dark:text-white">Genres</h3>
                 <div className="flex flex-wrap gap-2">
-                   {['Action', 'Adventure', 'Romance', 'System', 'Wuxia', 'Fantasy', 'Horror', 'Slice of Life'].map(g => (
-                      <span key={g} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-xs rounded hover:bg-zen-500 hover:text-black cursor-pointer transition text-gray-600 dark:text-gray-300">
+                   {/* UBAH: Mapping dari state genres, bukan array manual */}
+                   {genres.length > 0 ? genres.map(g => (
+                      <Link 
+                        key={g} 
+                        to={`/genre/${g}`} 
+                        className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-xs rounded hover:bg-zen-500 hover:text-white cursor-pointer transition text-gray-600 dark:text-gray-300 hover:text-black"
+                      >
                         {g}
-                      </span>
-                   ))}
+                      </Link>
+                   )) : (
+                     <span className="text-xs text-gray-500">No genres found.</span>
+                   )}
                 </div>
              </div>
 

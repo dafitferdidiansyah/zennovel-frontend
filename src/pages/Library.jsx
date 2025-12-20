@@ -50,26 +50,6 @@ export default function Library() {
                My <span className="text-zen-500">Library</span>
              </h1>
            </div>
-
-           {/* NAVBAR MENU */}
-           <div className="flex items-center gap-6 text-sm font-bold">
-              <Link to="/" className="hover:text-zen-500">HOME</Link>
-              
-              {isLoggedIn ? (
-                <>
-                    <span className="text-zen-500 flex items-center gap-1 cursor-default">
-                        <BookOpen size={16} /> LIBRARY
-                    </span>
-                    <button onClick={handleLogout} className="text-gray-500 hover:text-red-500 flex items-center gap-1">
-                        <LogOut size={16} /> LOGOUT
-                    </button>
-                </>
-              ) : (
-                <Link to="/login" className="bg-zen-500 text-white px-5 py-2 rounded-full font-bold text-xs hover:bg-zen-600 transition flex items-center gap-2">
-                    <User size={14} /> LOGIN
-                </Link>
-              )}
-           </div>
         </div>
       </nav>
 

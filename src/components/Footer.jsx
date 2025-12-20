@@ -1,19 +1,26 @@
-import { Zap } from 'lucide-react';
+import { Link } from "react-router-dom";
 
-export default function Footer() {
+const Footer = () => {
   return (
-    <footer className="bg-white dark:bg-[#1a1a1a] border-t border-gray-200 dark:border-gray-800 py-10 mt-auto transition-colors duration-300">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2 opacity-80">
-                <Zap className="text-zen-500 fill-current" size={20} />
-                <span className="font-bold text-lg dark:text-white">ZenNovel</span>
-            </div>
-            
-            <div className="text-sm text-gray-500 text-center md:text-right">
-                <p>&copy; {new Date().getFullYear()} ZenNovel. All rights reserved.</p>
-                <p className="text-xs mt-1">Read anywhere, anytime.</p>
-            </div>
+    <footer className="bg-white dark:bg-gray-800 border-t dark:border-gray-700 py-8 mt-auto transition-colors duration-300">
+      <div className="container mx-auto px-4 text-center">
+        {/* LOGO FOOTER MERAH */}
+        <Link to="/" className="text-xl font-bold text-red-600 dark:text-red-500 mb-4 inline-block hover:text-red-700 dark:hover:text-red-400 transition-colors">
+            ZenNovel
+        </Link>
+        
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          © {new Date().getFullYear()} ZenNovel. Read your favorite novels.
+        </p>
+        
+        <div className="flex justify-center gap-6 text-sm text-gray-500 dark:text-gray-500">
+           <a href="#" className="hover:text-red-500 transition-colors">Privacy Policy</a>
+           <a href="#" className="hover:text-red-500 transition-colors">Terms of Service</a>
+           <a href="#" className="hover:text-red-500 transition-colors">Contact</a>
         </div>
+      </div>
     </footer>
   );
-}
+};
+
+export default Footer;
