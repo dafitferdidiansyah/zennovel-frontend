@@ -69,7 +69,7 @@ export default function Detail() {
 
                 <div className="flex gap-3">
                     {novel.chapters?.length > 0 ? (
-                        <Link to={`/read/${novel.chapters[0].id}`} className="bg-zen-500 text-white font-bold py-2.5 px-8 rounded-full hover:bg-zen-600 transition shadow-lg">READ NOW</Link>
+                        <Link to={`/read/${novel.chapters[0].id}`} className="bg-zen-500 text-white font-bold py-2.5 px-8 rounded-full hover:bg-zen-500 transition shadow-lg">READ NOW</Link>
                     ) : <button disabled className="bg-gray-500 text-white py-2.5 px-8 rounded-full opacity-50">No Chapter</button>}
                     <button onClick={handleBookmark} className="bg-white dark:bg-[#333] text-gray-800 dark:text-white py-2.5 px-6 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100"><Bookmark size={18} /> Library</button>
                 </div>

@@ -34,39 +34,6 @@ export default function Home() {
   return (
     <div className="min-h-screen pb-20 bg-[#F4F4F4] dark:bg-[#151515] text-[#333] dark:text-[#bbb] transition-colors duration-300 font-sans">
       
-      {/* NAVBAR */}
-      <nav className="bg-white dark:bg-[#232323] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-           <div className="flex items-center gap-2">
-             <Zap className="text-zen-500 fill-current" />
-            <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-                Zen<span className="text-zen-500">Novel</span> {/* <--- Ini yang bikin merah */}
-            </h1>
-           </div>
-           
-           <div className="flex items-center gap-6 text-sm font-bold">
-              <Link to="/" className="hover:text-zen-500 text-zen-500">HOME</Link>
-                  <Link to="/search" className="p-2 text-gray-600 dark:text-gray-300 hover:text-zen-500 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-        <Search size={22} />
-    </Link>
-    
-              {isLoggedIn ? (
-                <>
-                    <Link to="/library" className="hover:text-zen-500 flex items-center gap-1">
-                        <BookOpen size={16} /> LIBRARY
-                    </Link>
-                    <button onClick={handleLogout} className="text-gray-500 hover:text-red-500 flex items-center gap-1">
-                        <LogOut size={16} /> LOGOUT
-                    </button>
-                </>
-              ) : (
-                <Link to="/login" className="bg-zen-500 text-white px-5 py-2 rounded-full font-bold text-xs hover:bg-zen-600 transition flex items-center gap-2">
-                    <User size={14} /> LOGIN
-                </Link>
-              )}
-           </div>
-        </div>
-      </nav>
 
       <div className="max-w-6xl mx-auto px-4 mt-6">
         

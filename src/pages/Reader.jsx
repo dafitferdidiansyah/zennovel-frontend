@@ -1,182 +1,116 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
-import { ArrowLeft, Settings, ChevronLeft, ChevronRight, List } from 'lucide-react'; // Ganti Home dengan List
+import { ChevronLeft, ChevronRight, List, ArrowUp, ArrowDown } from 'lucide-react';
 import CommentSection from '../components/CommentSection';
+import ReaderHeader from '../components/reader/ReaderHeader'; // Import Baru
+import ReaderFooter from '../components/reader/ReaderFooter'; // Import Baru
 
 export default function Reader() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [chapter, setChapter] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
-  
-  // Reader Settings
-  const [fontSize, setFontSize] = useState(18);
-  const [lineHeight, setLineHeight] = useState(1.6);
-  const [theme, setTheme] = useState('dark');
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
-  useEffect(() => {
-    setChapter(null);
-    window.scrollTo(0, 0);
-    api.getChapter(id)
-       .then(res => setChapter(res.data))
-       .catch(err => console.error(err));
-  }, [id]);
+  // Settings
+  const [fontSize, setFontSize] = useState(18);
+  const [lineHeight, setLineHeight] = useState(1.8);
+  const [themeMode, setThemeMode] = useState('dark');
 
   const themes = {
-    light: { bg: '#F4F4F4', text: '#333', ui: '#fff', border: '#ddd' },
+    light: { bg: '#F4F4F4', text: '#333', ui: '#fff', border: '#e5e7eb' },
     sepia: { bg: '#EAE4D3', text: '#5b4636', ui: '#F4F4E4', border: '#dcc6a0' },
     dark:  { bg: '#232323', text: '#bbb', ui: '#1b1b1b', border: '#333' },
   };
-  const currentTheme = themes[theme];
+  const currentTheme = themes[themeMode];
 
-  if (!chapter) return <div className="text-center py-20 text-[#bbb] bg-[#232323] min-h-screen">Loading chapter...</div>;
+  useEffect(() => {
+    setLoading(true); setChapter(null); window.scrollTo(0, 0);
+    api.getChapter(id).then(res => { setChapter(res.data); document.title = res.data.title; })
+       .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScrollAction = () => window.scrollTo({ top: showScrollTop ? 0 : document.body.scrollHeight, behavior: 'smooth' });
+
+  if (loading) return <div className="min-h-screen bg-[#232323] flex items-center justify-center text-gray-500">Loading...</div>;
+  if (!chapter) return null;
 
   return (
-    <div 
-      className="min-h-screen transition-colors duration-300 font-sans"
-      style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}
-    >
-      {/* 1. HEADER NAVIGASI */}
-      <div 
-        className={`fixed top-0 w-full p-3 flex items-center justify-between shadow-md z-50 transition-transform duration-300 ${showMenu ? 'translate-y-0' : '-translate-y-full'}`}
-        style={{ backgroundColor: currentTheme.ui, borderBottom: `1px solid ${currentTheme.border}` }}
-      >
-         <div className="flex items-center gap-3">
-             {/* Tombol Back */}
-             <Link to={`/novel/${chapter.novel_id}`} className="p-2 hover:bg-black/10 rounded transition">
-                <ArrowLeft size={20} />
-             </Link>
-             
-             {/* Judul Chapter */}
-             <span className="font-bold truncate max-w-[200px] md:max-w-md text-sm md:text-base">
-                {chapter.title}
-             </span>
-         </div>
-         <button onClick={() => setShowMenu(false)} className="p-2 hover:bg-black/10 rounded transition text-[#d9534f]">
-            <Settings size={20}/>
-         </button>
-      </div>
+    <div className="min-h-screen transition-colors duration-300 font-sans relative selection:bg-zen-500 selection:text-white"
+         style={{ backgroundColor: currentTheme.bg, color: currentTheme.text }}>
+      
+      {/* --- HEADER --- */}
+      <ReaderHeader 
+        title={chapter.title} 
+        showMenu={showMenu} 
+        setShowMenu={setShowMenu} 
+        novelId={chapter.novel_id} 
+        theme={currentTheme} 
+      />
 
-      {/* 2. WRAPPER UTAMA */}
-      <div className="max-w-3xl mx-auto px-4 pt-20 pb-32">
-         
-         {/* JUDUL CHAPTER DI ATAS TEKS */}
-         <div className="mb-6 border-b border-dashed border-gray-400 dark:border-[#444] pb-4">
-             <h1 className="text-2xl font-bold mb-4 text-[#d9534f]">{chapter.title}</h1>
-             
-             {/* Navigasi Kecil di Atas */}
-             <div className="flex justify-between items-center gap-2">
-                <button 
-                    disabled={!chapter.prev_chapter_id} 
-                    onClick={() => navigate(`/read/${chapter.prev_chapter_id}`)} 
-                    className="bg-[#5cb85c] text-white px-3 py-1 rounded text-xs hover:bg-[#449d44] disabled:opacity-50"
-                >
-                    <ChevronLeft size={12} className="inline"/> Prev
-                </button>
-
-                <Link to={`/novel/${chapter.novel_id}`} className="text-xs font-bold border border-gray-400 dark:border-gray-600 px-2 py-1 rounded hover:bg-[#d9534f] hover:text-white hover:border-[#d9534f] transition">
-                    <List size={12} className="inline mb-0.5"/> TOC
-                </Link>
-
-                <button 
-                    disabled={!chapter.next_chapter_id} 
-                    onClick={() => navigate(`/read/${chapter.next_chapter_id}`)} 
-                    className="bg-[#5cb85c] text-white px-3 py-1 rounded text-xs hover:bg-[#449d44] disabled:opacity-50"
-                >
-                    Next <ChevronRight size={12} className="inline"/>
-                </button>
-             </div>
-         </div>
-
-         {/* 3. TEKS NOVEL */}
-         <div 
-            className="prose dark:prose-invert max-w-none mb-10 select-none md:select-text"
-            style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight, fontFamily: 'Arial, sans-serif' }}
-            dangerouslySetInnerHTML={{ __html: chapter.content }}
-            onClick={() => setShowMenu(!showMenu)} 
-         />
-
-         {/* 4. NAVIGASI BAWAH (BODY) */}
-         <div className="flex justify-between items-center gap-2 mb-8">
-            <button 
-              disabled={!chapter.prev_chapter_id}
-              onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.prev_chapter_id}`); }}
-              className="flex-1 bg-[#5cb85c] text-white py-2 rounded text-sm font-bold hover:bg-[#449d44] transition disabled:opacity-50 flex items-center justify-center gap-1"
-            >
-              <ChevronLeft size={16}/> Prev
+      <div className="max-w-3xl mx-auto px-5 pt-24 pb-40">
+         {/* NAVIGASI ATAS */}
+         <div className="flex items-center gap-3 mb-10">
+            <button disabled={!chapter.prev_chapter_id} onClick={() => navigate(`/read/${chapter.prev_chapter_id}`)} 
+                    className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
+                <ChevronLeft size={18}/> <span>Prev</span>
             </button>
-            
-            {/* TOMBOL TOC DI TENGAH */}
-            <Link 
-                to={`/novel/${chapter.novel_id}`}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-600 dark:text-gray-300 hover:bg-[#d9534f] hover:text-white hover:border-[#d9534f] transition"
-                title="Table of Contents"
-            >
+            <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-sm">
                 <List size={20} />
             </Link>
-
-            <button 
-              disabled={!chapter.next_chapter_id}
-              onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.next_chapter_id}`); }}
-              className="flex-1 bg-[#5cb85c] text-white py-2 rounded text-sm font-bold hover:bg-[#449d44] transition disabled:opacity-50 flex items-center justify-center gap-1"
-            >
-              Next <ChevronRight size={16}/>
+            <button disabled={!chapter.next_chapter_id} onClick={() => navigate(`/read/${chapter.next_chapter_id}`)} 
+                    className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
+                <span>Next</span> <ChevronRight size={18}/>
             </button>
          </div>
 
-         {/* 5. KOMENTAR */}
-         <CommentSection chapterId={chapter.id} />
-      
-      </div>
+         {/* CONTENT */}
+         <div className="prose dark:prose-invert max-w-none mb-12 select-none md:select-text cursor-pointer leading-relaxed"
+              style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
+              dangerouslySetInnerHTML={{ __html: chapter.content }}
+              onClick={() => setShowMenu(!showMenu)} />
 
-      {/* 6. FOOTER SETTINGS PANEL */}
-      <div 
-        className={`fixed bottom-0 w-full p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)] z-50 transition-transform duration-300 ${showMenu ? 'translate-y-0' : 'translate-y-full'}`}
-        style={{ backgroundColor: currentTheme.ui, borderTop: `1px solid ${currentTheme.border}` }}
-      >
-
-         {/* SETTING FONT & THEME */}
-         <div className="max-w-3xl mx-auto space-y-4 pt-4 border-t border-gray-300 dark:border-gray-600">
-             <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-2">
-                     <span className="text-xs font-bold uppercase opacity-70 w-12">Font</span>
-                     <button onClick={() => setFontSize(s => Math.max(14, s-2))} className="px-3 py-1 bg-gray-200 dark:bg-[#333] rounded">-</button>
-                     <span className="text-sm w-6 text-center">{fontSize}</span>
-                     <button onClick={() => setFontSize(s => Math.min(32, s+2))} className="px-3 py-1 bg-gray-200 dark:bg-[#333] rounded">+</button>
-                 </div>
-                 <div className="flex items-center gap-2">
-                     <span className="text-xs font-bold uppercase opacity-70">Line</span>
-                     <select 
-                        value={lineHeight} 
-                        onChange={(e) => setLineHeight(e.target.value)}
-                        className="bg-gray-200 dark:bg-[#333] text-xs p-1 rounded outline-none"
-                     >
-                        <option value="1.4">140%</option>
-                        <option value="1.6">160%</option>
-                        <option value="1.8">180%</option>
-                        <option value="2.0">200%</option>
-                     </select>
-                 </div>
-             </div>
-             
-             <div className="flex items-center gap-2">
-                 <span className="text-xs font-bold uppercase opacity-70 w-12">Color</span>
-                 <div className="flex gap-2 flex-1">
-                     {['light', 'sepia', 'dark'].map(t => (
-                         <button 
-                            key={t} 
-                            onClick={() => setTheme(t)}
-                            className={`flex-1 py-1 rounded text-xs font-bold capitalize border ${theme === t ? 'border-[#d9534f] text-[#d9534f]' : 'border-transparent opacity-70'}`}
-                            style={{ backgroundColor: themes[t].bg, color: theme === t ? '#d9534f' : themes[t].text }}
-                         >
-                            {t}
-                         </button>
-                     ))}
-                 </div>
-             </div>
+         {/* NAVIGASI BAWAH */}
+         <div className="flex items-center gap-3 mb-10 pt-8 border-t border-dashed border-gray-400 dark:border-gray-700">
+            <button disabled={!chapter.prev_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.prev_chapter_id}`); }} 
+                    className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
+                <ChevronLeft size={18}/> <span>Prev</span>
+            </button>
+            <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-md">
+                <List size={20} />
+            </Link>
+            <button disabled={!chapter.next_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.next_chapter_id}`); }} 
+                    className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
+                <span>Next</span> <ChevronRight size={18}/>
+            </button>
          </div>
+
+         <CommentSection chapterId={chapter.id} />
       </div>
+
+      {/* SCROLL BUTTON */}
+      <div className={`fixed bottom-24 right-5 z-40 transition-all duration-500 transform ${showMenu ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-50 hover:opacity-100 hover:translate-y-0'}`}>
+          <button onClick={handleScrollAction} className="p-3 bg-gray-800/80 dark:bg-white/10 backdrop-blur-md text-white border border-gray-700 dark:border-gray-500 rounded-full shadow-xl hover:bg-zen-500 hover:border-zen-500 transition-all transform hover:scale-110">
+            {showScrollTop ? <ArrowUp size={24} /> : <ArrowDown size={24} />}
+          </button>
+      </div>
+
+      {/* --- FOOTER SETTINGS --- */}
+      <ReaderFooter 
+        showMenu={showMenu} 
+        fontSize={fontSize} setFontSize={setFontSize}
+        lineHeight={lineHeight} setLineHeight={setLineHeight}
+        themeMode={themeMode} setTheme={setThemeMode}
+        theme={currentTheme}
+      />
     </div>
   );
 }
