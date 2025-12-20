@@ -21,6 +21,11 @@ export default function Login() {
       localStorage.setItem('access_token', res.data.access);
       localStorage.setItem('refresh_token', res.data.refresh);
       
+      const userData = {
+        username: username, // Mengambil variabel state 'username' dari form
+        name: username      // Samakan saja dengan username
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
       // Redirect ke Home
       window.location.href = '/'; 
     } catch (err) {
