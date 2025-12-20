@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Flame, Clock, Zap, LogOut, User } from 'lucide-react';
+import { BookOpen, Flame, Clock, Zap, LogOut, User , Search} from 'lucide-react';
 import { api, BASE_URL } from '../api'; // Import BASE_URL untuk gambar
+
 
 export default function Home() {
   const [data, setData] = useState({ hot: [], latest: [], completed: [] });
@@ -45,7 +46,10 @@ export default function Home() {
            
            <div className="flex items-center gap-6 text-sm font-bold">
               <Link to="/" className="hover:text-zen-500 text-zen-500">HOME</Link>
-              
+                  <Link to="/search" className="p-2 text-gray-600 dark:text-gray-300 hover:text-zen-500 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+        <Search size={22} />
+    </Link>
+    
               {isLoggedIn ? (
                 <>
                     <Link to="/library" className="hover:text-zen-500 flex items-center gap-1">

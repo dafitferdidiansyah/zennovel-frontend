@@ -7,7 +7,7 @@ export const API_URL = `${BASE_URL}/api`;
 export const api = {
   // Gunakan API_URL disini
   getHomeData: () => axios.get(`${API_URL}/home/`),
-  getNovels: () => axios.get(`${API_URL}/novels/`),
+  getNovels: (params) => axios.get(`${API_URL}/novels/`, { params }),
   getDetail: (id) => axios.get(`${API_URL}/novels/${id}/`),
   getChapter: (id) => axios.get(`${API_URL}/chapters/${id}/`),
   

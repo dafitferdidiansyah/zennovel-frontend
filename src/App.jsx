@@ -7,6 +7,7 @@ import Login from './pages/Login';       // <--- Import
 import Register from './pages/Register'; // <--- Import
 import NotFound from './pages/NotFound';
 import TagPage from './pages/TagPage';
+import SearchPage from './pages/SearchPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/tag/:slug" element={<TagPage />} />
+          <Route path="/search" element={<SearchPage />} /> {/* Route Baru */}
           {/* Menangkap semua URL yang tidak terdaftar */}
           <Route path="*" element={<NotFound />} />
         </Routes>

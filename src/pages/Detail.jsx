@@ -1,236 +1,118 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api, BASE_URL } from '../api'; 
-import { BookOpen, Star, ArrowLeft, Bookmark, Zap, LogOut, User, Hash } from 'lucide-react'; // Tambah icon Hash
+import { BookOpen, Star, ArrowLeft, Bookmark, Hash, Eye } from 'lucide-react';
 
 export default function Detail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [novel, setNovel] = useState(null);
   const [activeTab, setActiveTab] = useState('desc');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // State untuk interaksi rating
-  const [userRating, setUserRating] = useState(0); 
+  const [userRating, setUserRating] = useState(0);
+  const token = localStorage.getItem('access_token');
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    setIsLoggedIn(!!token);
-
     window.scrollTo(0, 0);
-    api.getDetail(id)
-       .then(res => setNovel(res.data))
-       .catch(err => console.error(err));
+    api.getDetail(id).then(res => setNovel(res.data)).catch(console.error);
   }, [id]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    setIsLoggedIn(false);
-    navigate('/login');
-  };
-  
-  const handleBookmark = async () => {
-    const token = localStorage.getItem('access_token');
-    if(!token) return navigate('/login');
-    
-    try {
-        await api.toggleBookmark(novel.id, token);
-        alert("Success! Check your Library.");
-    } catch (err) {
-        console.error(err);
-        alert("Failed to bookmark.");
-    }
-  };
-
-  // --- LOGIKA RATING BARU ---
   const handleRate = async (score) => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        if(confirm("Please login to rate this novel.")) navigate('/login');
-        return;
-    }
-    
+    if (!token) return navigate('/login');
     try {
         const res = await api.rateNovel(novel.id, score, token);
-        // Update tampilan rating secara real-time
         setNovel(prev => ({...prev, rating: res.data.new_rating}));
-        alert(`Thank you! You rated ${score} stars.`);
-    } catch (err) {
-        alert("Failed to rate.");
-    }
+        alert(`Rated ${score} stars!`);
+    } catch { alert("Failed to rate."); }
   }
-  // --------------------------
+
+  const handleBookmark = async () => {
+    if(!token) return navigate('/login');
+    try { await api.toggleBookmark(novel.id, token); alert("Library updated!"); } catch { alert("Failed."); }
+  };
 
   if (!novel) return <div className="text-center py-20 text-gray-500">Loading...</div>;
 
   return (
     <div className="min-h-screen pb-10 bg-[#F4F4F4] dark:bg-[#151515] text-[#333] dark:text-[#bbb] font-sans">
-      
-      {/* NAVBAR */}
-      <nav className="bg-transparent absolute top-0 w-full z-50">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-           <Link to="/" className="p-2 bg-black/40 rounded-full text-white hover:bg-zen-500 transition backdrop-blur-sm">
-                <ArrowLeft size={20} />
-           </Link>
-           
-           <div className="flex items-center gap-4">
-              {isLoggedIn ? (
-                 <button onClick={handleLogout} className="px-4 py-1.5 bg-black/40 text-white rounded-full text-xs font-bold hover:bg-red-600 transition backdrop-blur-sm flex items-center gap-1">
-                    <LogOut size={14} /> LOGOUT
-                 </button>
-              ) : (
-                 <Link to="/login" className="px-4 py-1.5 bg-zen-500 text-white rounded-full text-xs font-bold hover:bg-zen-600 transition shadow-lg flex items-center gap-1">
-                    <User size={14} /> LOGIN
-                 </Link>
-              )}
-           </div>
-        </div>
-      </nav>
-
-      {/* HEADER GAMBAR BESAR */}
+      {/* HEADER IMAGE */}
       <div className="relative h-72 w-full overflow-hidden">
-        <img 
-          src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
-          className="w-full h-full object-cover opacity-60 blur-sm transform scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#F4F4F4] dark:from-[#151515] via-[#151515]/60 to-transparent" />
+        <img src={novel.cover ? `${BASE_URL}${novel.cover}` : ''} className="w-full h-full object-cover opacity-60 blur-sm scale-110"/>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#F4F4F4] dark:from-[#151515] to-transparent" />
+        <Link to="/" className="absolute top-4 left-4 p-2 bg-black/30 rounded-full text-white hover:bg-zen-500 transition"><ArrowLeft size={20}/></Link>
       </div>
 
-      {/* INFO NOVEL */}
       <div className="max-w-4xl mx-auto px-4 -mt-32 relative z-10">
         <div className="flex flex-col md:flex-row gap-8 items-start">
-            {/* Cover Depan */}
-            <div className="w-44 mx-auto md:mx-0 flex-shrink-0 rounded-lg shadow-2xl overflow-hidden border-4 border-white dark:border-[#232323] bg-gray-200 relative group">
-                 <img 
-                    src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} 
-                    className="w-full h-full object-cover"
-                />
+            {/* COVER BUKU */}
+            <div className="w-44 flex-shrink-0 rounded-lg shadow-2xl overflow-hidden border-4 border-white dark:border-[#232323]">
+                 <img src={novel.cover ? `${BASE_URL}${novel.cover}` : ''} className="w-full h-full object-cover"/>
             </div>
             
-            {/* Teks Info */}
-            <div className="flex-1 text-center md:text-left pt-2 md:pt-12">
-                <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 leading-tight drop-shadow-md">{novel.title}</h1>
-                <div className="flex flex-wrap justify-center md:justify-start gap-3 text-sm text-gray-300 mb-6">
-                     <span className="bg-white/10 backdrop-blur-md px-2 py-0.5 rounded border border-white/20">{novel.genre}</span>
-                     <span className="flex items-center gap-1"><BookOpen size={16}/> {novel.status}</span>
-                     
-                     {/* --- RATING INTERAKTIF --- */}
-                     <span className="flex items-center gap-1 bg-black/20 px-2 rounded-md backdrop-blur-sm border border-white/10">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <Star 
-                                key={star} 
-                                size={16} 
-                                // Logika: Isi bintang jika <= rating user (saat hover) ATAU rating novel (saat diam)
-                                fill={star <= (userRating || Math.round(novel.rating || 0)) ? "gold" : "none"} 
-                                className={`text-yellow-400 cursor-pointer transition ${star <= userRating ? 'scale-125' : ''}`}
-                                onMouseEnter={() => setUserRating(star)}
-                                onMouseLeave={() => setUserRating(0)}
-                                onClick={() => handleRate(star)}
-                            />
-                        ))}
-                        <span className="ml-1 text-xs font-bold">{novel.rating ? parseFloat(novel.rating).toFixed(1) : '0.0'}</span>
-                     </span>
-                     {/* ------------------------- */}
+            {/* INFO TEXT */}
+            <div className="flex-1 pt-2 md:pt-12">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{novel.title}</h1>
+                <div className="flex flex-wrap gap-3 text-sm text-gray-300 mb-4">
+                     <span className="bg-zen-500 text-white px-2 py-0.5 rounded">{novel.genre}</span>
+                     <span className="flex items-center gap-1"><Eye size={16}/> {novel.views}</span>
+                     <span className="flex items-center gap-1"><Star size={16} className="text-yellow-400 fill-current"/> {novel.rating}</span>
+                </div>
+                
+                {/* RATING INTERAKTIF */}
+                <div className="flex items-center gap-1 mb-6 bg-black/20 w-fit px-3 py-1 rounded-full backdrop-blur-sm">
+                    {[1,2,3,4,5].map(s => (
+                        <Star key={s} size={24} 
+                              fill={s <= (userRating || Math.round(novel.rating)) ? "gold" : "none"}
+                              className="text-yellow-400 cursor-pointer hover:scale-110 transition"
+                              onMouseEnter={() => setUserRating(s)} onMouseLeave={() => setUserRating(0)} onClick={() => handleRate(s)}/>
+                    ))}
                 </div>
 
-                <div className="flex justify-center md:justify-start gap-3">
+                <div className="flex gap-3">
                     {novel.chapters?.length > 0 ? (
-                        <Link 
-                            to={`/read/${novel.chapters[0].id}`} 
-                            className="bg-zen-500 text-white font-bold py-2.5 px-8 rounded-full hover:bg-zen-600 transition shadow-lg shadow-zen-500/30"
-                        >
-                            READ NOW
-                        </Link>
-                    ) : (
-                        <button disabled className="bg-gray-500 text-white py-2.5 px-8 rounded-full cursor-not-allowed opacity-70">No Chapter</button>
-                    )}
-                    <button 
-                        onClick={handleBookmark}
-                        className="bg-white dark:bg-[#232323] text-gray-800 dark:text-white py-2.5 px-6 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center gap-2 border border-gray-200 dark:border-gray-700 shadow-sm"
-                    >
-                        <Bookmark size={18} /> Library
-                    </button>
+                        <Link to={`/read/${novel.chapters[0].id}`} className="bg-zen-500 text-white font-bold py-2.5 px-8 rounded-full hover:bg-zen-600 transition shadow-lg">READ NOW</Link>
+                    ) : <button disabled className="bg-gray-500 text-white py-2.5 px-8 rounded-full opacity-50">No Chapter</button>}
+                    <button onClick={handleBookmark} className="bg-white dark:bg-[#333] text-gray-800 dark:text-white py-2.5 px-6 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100"><Bookmark size={18} /> Library</button>
                 </div>
             </div>
         </div>
 
-        {/* TABS */}
-        <div className="mt-10">
-             <div className="flex border-b border-gray-300 dark:border-gray-700 mb-0">
-                <button 
-                onClick={() => setActiveTab('desc')}
-                className={`px-6 py-3 font-bold text-sm uppercase transition-all relative ${activeTab === 'desc' ? 'text-zen-500' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
-                >
-                Description
-                {activeTab === 'desc' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-zen-500"></span>}
-                </button>
-                <button 
-                onClick={() => setActiveTab('chap')}
-                className={`px-6 py-3 font-bold text-sm uppercase transition-all relative ${activeTab === 'chap' ? 'text-zen-500' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
-                >
-                Chapters ({novel.chapters?.length || 0})
-                {activeTab === 'chap' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-zen-500"></span>}
-                </button>
+        {/* TABS (DESKRIPSI / CHAPTER) */}
+        <div className="mt-10 bg-white dark:bg-[#232323] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex border-b border-gray-300 dark:border-gray-700 mb-6">
+                <button onClick={() => setActiveTab('desc')} className={`px-6 py-3 font-bold border-b-2 transition ${activeTab === 'desc' ? 'border-zen-500 text-zen-500' : 'border-transparent text-gray-500'}`}>Description</button>
+                <button onClick={() => setActiveTab('chap')} className={`px-6 py-3 font-bold border-b-2 transition ${activeTab === 'chap' ? 'border-zen-500 text-zen-500' : 'border-transparent text-gray-500'}`}>Chapters</button>
             </div>
 
-            {/* TAB CONTENT */}
-            <div className="bg-white dark:bg-[#232323] p-6 rounded-b-lg shadow-sm border border-t-0 border-gray-200 dark:border-gray-700 min-h-[300px]">
-                
-                {activeTab === 'desc' && (
-                <div className="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    <p className="whitespace-pre-line mb-6">{novel.synopsis || "No synopsis available."}</p>
+            {activeTab === 'desc' && (
+                <div className="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300">
+                    <p className="whitespace-pre-line mb-6">{novel.synopsis}</p>
                     
-                    {/* --- BAGIAN TAGS --- */}
-                    {novel.tags && novel.tags.length > 0 && (
-                        <div className="mb-6 flex flex-wrap gap-2">
-                             {novel.tags.map(tag => (
-                                 <Link 
-                                    key={tag.id} 
-                                    to={`/tag/${tag.slug}`}
-                                    className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full hover:bg-zen-500 hover:text-white transition flex items-center gap-1"
-                                 >
-                                    <Hash size={12}/> {tag.name}
-                                 </Link>
-                             ))}
-                        </div>
-                    )}
-                    {/* ------------------- */}
-
-                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-4">
-                        <div>
-                            <span className="text-xs font-bold uppercase text-gray-400 block mb-1">Author</span>
-                            <span className="text-zen-500 font-semibold">{novel.author}</span>
-                        </div>
-                        <div>
-                           <span className="text-xs font-bold uppercase text-gray-400 block mb-1">Uploaded</span>
-                           <span className="text-gray-700 dark:text-gray-300">{new Date(novel.uploaded_at).toLocaleDateString()}</span>
-                        </div>
+                    {/* --- TAGS (SUDAH DIPERBAIKI) --- */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {novel.tags && novel.tags.length > 0 ? novel.tags.map(tag => (
+                            <Link key={tag.id} to={`/tag/${tag.slug}`} className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 hover:bg-zen-500 hover:text-white px-3 py-1 rounded-full text-xs transition">
+                                <Hash size={12}/> {tag.name}
+                            </Link>
+                        )) : <span className="italic opacity-50 text-xs">No tags available</span>}
+                    </div>
+                    
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <span className="font-bold text-zen-500 block text-xs uppercase mb-1">Author</span>
+                        <span className="text-lg font-medium">{novel.author}</span>
                     </div>
                 </div>
-                )}
+            )}
 
-                {activeTab === 'chap' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0">
+            {activeTab === 'chap' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                     {novel.chapters?.map((chap) => (
-                        <Link 
-                            key={chap.id} 
-                            to={`/read/${chap.id}`}
-                            className="border-b border-dashed border-gray-200 dark:border-gray-700 py-3 hover:text-zen-500 truncate text-sm text-gray-600 dark:text-gray-300 block flex items-center justify-between group"
-                        >
-                            <span>{chap.title}</span>
-                            <span className="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition">READ</span>
+                        <Link key={chap.id} to={`/read/${chap.id}`} className="border-b border-dashed border-gray-200 dark:border-gray-700 py-3 hover:text-zen-500 truncate text-sm block transition-colors">
+                            {chap.title}
                         </Link>
                     ))}
-                    {(!novel.chapters || novel.chapters.length === 0) && (
-                        <p className="text-gray-500 italic py-10 text-center">No chapters uploaded yet.</p>
-                    )}
                 </div>
-                )}
-
-            </div>
+            )}
         </div>
-
       </div>
     </div>
   );
