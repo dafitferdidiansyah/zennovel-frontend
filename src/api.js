@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Ganti ini saja jika URL berubah
-export const BASE_URL = 'http://localhost:8000'; 
+export const BASE_URL = 'zennovel.netlify.app'; 
 export const API_URL = `${BASE_URL}/api`;
 
 export const api = {

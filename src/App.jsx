@@ -46,7 +46,7 @@ function App() {
 
           <Route path="*" element={<NotFound />} />
         </Route>
-        <Route path="/read/:id/:chapterId" element={<Reader />} />
+        <Route path="/read/:novelId/:chapterId" element={<Reader />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>

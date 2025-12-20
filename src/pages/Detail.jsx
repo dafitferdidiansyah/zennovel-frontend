@@ -111,7 +111,7 @@ export default function Detail() {
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
                     {novel.chapters?.length > 0 ? (
                         <Link 
-                            to={`/read/${novel.chapters[0].id}`} 
+                            to={`/read/${novel.id}/${novel.chapters[0].id}`} 
                             className="group flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white py-3.5 px-6 rounded-2xl font-bold text-base shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-2"
                         >
                             <BookOpen size={20} className="group-hover:animate-pulse" />
@@ -178,7 +178,7 @@ export default function Detail() {
             {activeTab === 'chap' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                     {novel.chapters?.map((chap) => (
-                        <Link key={chap.id} to={`/read/${chap.id}`} className="border-b border-dashed border-gray-200 dark:border-gray-700 py-3 hover:text-red-500 truncate text-sm block transition-colors">
+                        <Link key={chap.id} to={`/read/${novel.id}/${chap.id}`} className="border-b border-dashed border-gray-200 dark:border-gray-700 py-3 hover:text-red-500 truncate text-sm block transition-colors">
                             {chap.title}
                         </Link>
                     ))}

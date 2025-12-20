@@ -7,7 +7,7 @@ import ReaderHeader from '../components/reader/ReaderHeader'; // Import Baru
 import ReaderFooter from '../components/reader/ReaderFooter'; // Import Baru
 
 export default function Reader() {
-  const { id } = useParams();
+  const { novelId, chapterId } = useParams();
   const navigate = useNavigate();
   const [chapter, setChapter] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,9 +28,13 @@ export default function Reader() {
 
   useEffect(() => {
     setLoading(true); setChapter(null); window.scrollTo(0, 0);
-    api.getChapter(id).then(res => { setChapter(res.data); document.title = res.data.title; })
-       .finally(() => setLoading(false));
-  }, [id]);
+api.getChapter(chapterId).then(res => { 
+        setChapter(res.data); 
+        document.title = res.data.title; 
+    })
+    .finally(() => setLoading(false));
+
+  }, [chapterId]);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
@@ -59,14 +63,14 @@ export default function Reader() {
       <div className="max-w-3xl mx-auto px-5 pt-24 pb-40">
          {/* NAVIGASI ATAS */}
          <div className="flex items-center gap-3 mb-10">
-            <button disabled={!chapter.prev_chapter_id} onClick={() => navigate(`/read/${chapter.prev_chapter_id}`)} 
+            <button disabled={!chapter.prev_chapter_id} onClick={() => navigate(`/read/${novelId}/${chapter.prev_chapter_id}`)} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
                 <ChevronLeft size={18}/> <span>Prev</span>
             </button>
             <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-sm">
                 <List size={20} />
             </Link>
-            <button disabled={!chapter.next_chapter_id} onClick={() => navigate(`/read/${chapter.next_chapter_id}`)} 
+            <button disabled={!chapter.next_chapter_id} onClick={() => navigate(`/read/${novelId}/${chapter.next_chapter_id}`)} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
                 <span>Next</span> <ChevronRight size={18}/>
             </button>
@@ -82,14 +86,14 @@ export default function Reader() {
 
          {/* NAVIGASI BAWAH */}
          <div className="flex items-center gap-3 mb-10 pt-8 border-t border-dashed border-gray-400 dark:border-gray-700">
-            <button disabled={!chapter.prev_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.prev_chapter_id}`); }} 
+            <button disabled={!chapter.prev_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${novelId}/${chapter.prev_chapter_id}`); }} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
                 <ChevronLeft size={18}/> <span>Prev</span>
             </button>
             <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-md">
                 <List size={20} />
             </Link>
-            <button disabled={!chapter.next_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${chapter.next_chapter_id}`); }} 
+            <button disabled={!chapter.next_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${novelId}/${chapter.next_chapter_id}`); }} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
                 <span>Next</span> <ChevronRight size={18}/>
             </button>
