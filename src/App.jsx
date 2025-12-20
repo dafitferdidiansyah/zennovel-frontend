@@ -12,7 +12,7 @@ import NotFound from './pages/NotFound';
 
 function App() {
   return (
-    <div className="dark"> 
+     
       <BrowserRouter>
         <Routes>
           {/* Halaman dengan Navbar & Footer */}
@@ -32,7 +32,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-    </div>
+    
   );
 }
 
