@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { api, BASE_URL } from '../api'; // Import BASE_URL untuk gambar
-import { BookOpen, Star, ArrowLeft, Bookmark, Zap, LogOut, User } from 'lucide-react';
-
+import { api, BASE_URL } from '../api'; 
+import { BookOpen, Star, ArrowLeft, Bookmark, Zap, LogOut, User, Hash } from 'lucide-react'; // Tambah icon Hash
 
 export default function Detail() {
   const { id } = useParams();
@@ -10,6 +9,9 @@ export default function Detail() {
   const [novel, setNovel] = useState(null);
   const [activeTab, setActiveTab] = useState('desc');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // State untuk interaksi rating
+  const [userRating, setUserRating] = useState(0); 
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -28,7 +30,6 @@ export default function Detail() {
     navigate('/login');
   };
   
-  // Fungsi Add Bookmark
   const handleBookmark = async () => {
     const token = localStorage.getItem('access_token');
     if(!token) return navigate('/login');
@@ -41,6 +42,25 @@ export default function Detail() {
         alert("Failed to bookmark.");
     }
   };
+
+  // --- LOGIKA RATING BARU ---
+  const handleRate = async (score) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        if(confirm("Please login to rate this novel.")) navigate('/login');
+        return;
+    }
+    
+    try {
+        const res = await api.rateNovel(novel.id, score, token);
+        // Update tampilan rating secara real-time
+        setNovel(prev => ({...prev, rating: res.data.new_rating}));
+        alert(`Thank you! You rated ${score} stars.`);
+    } catch (err) {
+        alert("Failed to rate.");
+    }
+  }
+  // --------------------------
 
   if (!novel) return <div className="text-center py-20 text-gray-500">Loading...</div>;
 
@@ -94,7 +114,24 @@ export default function Detail() {
                 <div className="flex flex-wrap justify-center md:justify-start gap-3 text-sm text-gray-300 mb-6">
                      <span className="bg-white/10 backdrop-blur-md px-2 py-0.5 rounded border border-white/20">{novel.genre}</span>
                      <span className="flex items-center gap-1"><BookOpen size={16}/> {novel.status}</span>
-                     <span className="flex items-center gap-1"><Star size={16} className="text-yellow-400 fill-current"/> {novel.rating || 'N/A'}</span>
+                     
+                     {/* --- RATING INTERAKTIF --- */}
+                     <span className="flex items-center gap-1 bg-black/20 px-2 rounded-md backdrop-blur-sm border border-white/10">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <Star 
+                                key={star} 
+                                size={16} 
+                                // Logika: Isi bintang jika <= rating user (saat hover) ATAU rating novel (saat diam)
+                                fill={star <= (userRating || Math.round(novel.rating || 0)) ? "gold" : "none"} 
+                                className={`text-yellow-400 cursor-pointer transition ${star <= userRating ? 'scale-125' : ''}`}
+                                onMouseEnter={() => setUserRating(star)}
+                                onMouseLeave={() => setUserRating(0)}
+                                onClick={() => handleRate(star)}
+                            />
+                        ))}
+                        <span className="ml-1 text-xs font-bold">{novel.rating ? parseFloat(novel.rating).toFixed(1) : '0.0'}</span>
+                     </span>
+                     {/* ------------------------- */}
                 </div>
 
                 <div className="flex justify-center md:justify-start gap-3">
@@ -142,8 +179,25 @@ export default function Detail() {
                 
                 {activeTab === 'desc' && (
                 <div className="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    <p className="whitespace-pre-line">{novel.synopsis || "No synopsis available."}</p>
-                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-4">
+                    <p className="whitespace-pre-line mb-6">{novel.synopsis || "No synopsis available."}</p>
+                    
+                    {/* --- BAGIAN TAGS --- */}
+                    {novel.tags && novel.tags.length > 0 && (
+                        <div className="mb-6 flex flex-wrap gap-2">
+                             {novel.tags.map(tag => (
+                                 <Link 
+                                    key={tag.id} 
+                                    to={`/tag/${tag.slug}`}
+                                    className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full hover:bg-zen-500 hover:text-white transition flex items-center gap-1"
+                                 >
+                                    <Hash size={12}/> {tag.name}
+                                 </Link>
+                             ))}
+                        </div>
+                    )}
+                    {/* ------------------- */}
+
+                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-4">
                         <div>
                             <span className="text-xs font-bold uppercase text-gray-400 block mb-1">Author</span>
                             <span className="text-zen-500 font-semibold">{novel.author}</span>
