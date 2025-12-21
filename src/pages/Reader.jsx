@@ -3,8 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { ChevronLeft, ChevronRight, List, ArrowUp, ArrowDown } from 'lucide-react';
 import CommentSection from '../components/CommentSection';
-import ReaderHeader from '../components/reader/ReaderHeader'; // Import Baru
-import ReaderFooter from '../components/reader/ReaderFooter'; // Import Baru
+import ReaderHeader from '../components/reader/ReaderHeader'; 
+import ReaderFooter from '../components/reader/ReaderFooter'; 
 
 export default function Reader() {
   const { novelId, chapterId } = useParams();
@@ -29,52 +29,54 @@ export default function Reader() {
   const saveToLocalStorage = (chap) => {
     let history = JSON.parse(localStorage.getItem('reading_history')) || [];
     
-    // 1. Hapus riwayat lama novel ini (supaya tidak duplikat)
+    // 1. Hapus riwayat lama novel ini
     history = history.filter(item => item.id !== chap.novel_id);
     
     // 2. Buat object data baru
+    // DATA INI DIAMBIL DARI BACKEND YANG SUDAH DIPERBAIKI (ChapterDetailSerializer)
     const newEntry = {
         id: chap.novel_id,
-        title: chap.novel_title,     // Dari Serializer tadi
-        cover: chap.novel_cover,     // Dari Serializer tadi
+        title: chap.novel_title,     
+        cover: chap.novel_cover,     
         chapter_id: chap.id,
         chapter_title: chap.title,
-        chapter_order: chap.chapter_number, // Atau chap.order
+        chapter_order: chap.chapter_number, 
         timestamp: new Date().getTime()
     };
     
-    // 3. Masukkan ke paling depan (Array unshift)
+    // 3. Masukkan ke paling depan
     history.unshift(newEntry);
     
-    // 4. Batasi maksimal 10 riwayat agar browser tidak berat
+    // 4. Batasi maksimal 10
     if (history.length > 10) history.pop();
     
     // 5. Simpan
     localStorage.setItem('reading_history', JSON.stringify(history));
   };
 
-useEffect(() => {
-  window.scrollTo(0, 0);
-  setLoading(true);
-  setChapter(null);
-  const token = localStorage.getItem('access_token');
-  api.getChapter(chapterId).then(res => { 
-      const chapData = res.data;
-      setChapter(chapData); 
-      document.title = chapData.title;
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setLoading(true);
+    setChapter(null);
+    const token = localStorage.getItem('access_token');
+    
+    api.getChapter(chapterId).then(res => { 
+        const chapData = res.data;
+        setChapter(chapData); 
+        document.title = chapData.title;
 
-      if (token) {
-          // A. JIKA LOGIN: Kirim ke Database Server
-          api.updateProgress(chapData.novel_id, chapterId, token)
-             .catch(err => console.error("Gagal sync progress", err));
-      } else {
-          // B. JIKA TAMU: Simpan ke LocalStorage Browser
-          saveToLocalStorage(chapData);
-      }
-      })
-      .finally(() => setLoading(false));
+        if (token) {
+            // A. JIKA LOGIN: Kirim ke Database
+            api.updateProgress(chapData.novel_id, chapterId, token)
+               .catch(err => console.error("Gagal sync progress", err));
+        } else {
+            // B. JIKA TAMU: Simpan ke LocalStorage
+            saveToLocalStorage(chapData);
+        }
+    })
+    .finally(() => setLoading(false));
 
-}, [chapterId]);
+  }, [chapterId]);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
@@ -94,6 +96,7 @@ useEffect(() => {
       {/* --- HEADER --- */}
       <ReaderHeader 
         title={chapter.title} 
+        chapterNumber={chapter.chapter_number}
         showMenu={showMenu} 
         setShowMenu={setShowMenu} 
         novelId={chapter.novel_id} 

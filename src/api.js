@@ -18,7 +18,11 @@ export const api = {
     return axios.get(`${API_URL}/novels/${id}`, config);
 },
   getChapter: (id) => axios.get(`${API_URL}/chapters/${id}/`),
-  
+  updateProgress: (novelId, chapterId, token) => axios.post(
+      `${API_URL}/progress/${novelId}/${chapterId}/`, 
+      {}, 
+      { headers: { Authorization: `Bearer ${token}` } }
+  ),
   // Auth
   login: (creds) => axios.post(`${API_URL}/token/`, creds),
   register: (data) => axios.post(`${API_URL}/register/`, data),
@@ -43,9 +47,5 @@ export const api = {
   getNovelsByTag: (tag) => axios.get(`${API_URL}/novels/?tag=${tag}`),
   getNovelsByGenre: (genre) => axios.get(`${API_URL}/novels/?genre=${genre}`),
   getGenres: () => axios.get(`${API_URL}/genres/`),
-  updateProgress: (novelId, chapterId, token) => axios.post(
-      `${API_URL}/progress/${novelId}/${chapterId}/`, 
-      {}, 
-      { headers: { Authorization: `Bearer ${token}` } }
-  ),
+
 };
