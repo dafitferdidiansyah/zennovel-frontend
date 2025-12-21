@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Ganti ini saja jika URL berubah
-export const BASE_URL = 'dafit29.pythonanywhere.com'; 
+export const BASE_URL = 'https://dafit29.pythonanywhere.com'; 
 export const API_URL = `${BASE_URL}/api`;
 
 export const api = {
