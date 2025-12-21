@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api, BASE_URL } from '../api'; 
-import { BookOpen, Star, ArrowLeft, Bookmark, Hash, Eye, Check, Plus } from 'lucide-react';
+import { BookOpen, Star, ArrowLeft, Eye, Check, Plus, Hash } from 'lucide-react';
 
 export default function Detail() {
   const { id } = useParams();
@@ -12,7 +12,8 @@ export default function Detail() {
   
   // State untuk status library
   const [isInLibrary, setIsInLibrary] = useState(false);
-  
+  const [readChapterIds, setReadChapterIds] = useState(new Set());
+  const [lastRead, setLastRead] = useState(null);
   const token = localStorage.getItem('access_token');
 
   useEffect(() => {
@@ -28,6 +29,22 @@ export default function Detail() {
         } else {
             setIsInLibrary(false);
         }
+
+
+        const history = JSON.parse(localStorage.getItem('reading_history')) || [];
+        
+        // 1. Cari riwayat terakhir novel ini untuk tombol "Continue"
+        // Karena history pake unshift (paling baru di index 0), kita cari yang pertama ketemu
+        const currentNovelHistory = history.find(h => h.id == id); // id novel
+        if (currentNovelHistory) {
+            setLastRead(currentNovelHistory);
+        }
+        const readIds = new Set(
+            history
+            .filter(h => h.id == id)
+            .map(h => h.chapter_id) // Ambil ID chapternya
+        );
+        setReadChapterIds(readIds);
     }).catch(console.error);
     
   }, [id, token]);
@@ -107,15 +124,25 @@ export default function Detail() {
                     ))}
                 </div>
 
-                {/* --- TOMBOL --- */}
+               {/* --- TOMBOL SMART (START / CONTINUE) --- */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
                     {novel.chapters?.length > 0 ? (
                         <Link 
-                            to={`/read/${novel.id}/${novel.chapters[0].id}`} 
+                            // LOGIKA LINK: Kalau ada lastRead, ke sana. Kalau tidak, ke chapter pertama [0]
+                            to={lastRead 
+                                ? `/read/${novel.id}/${lastRead.chapter_id}` 
+                                : `/read/${novel.id}/${novel.chapters[0].id}`
+                            } 
                             className="group flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white py-3.5 px-6 rounded-2xl font-bold text-base shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-2"
                         >
                             <BookOpen size={20} className="group-hover:animate-pulse" />
-                            <span>Start Reading</span>
+                            {/* LOGIKA TEXT: Ganti text tombol */}
+                            <span>
+                                {lastRead 
+                                    ? `Continue: Ch ${lastRead.chapter_order}` // Tampilkan "Continue: Ch 5"
+                                    : "Start Reading"
+                                }
+                            </span>
                         </Link>
                     ) : (
                         <button disabled className="flex-1 bg-gray-300 dark:bg-gray-700 text-gray-500 py-3.5 px-6 rounded-2xl font-bold cursor-not-allowed flex justify-center items-center gap-2">
@@ -171,6 +198,14 @@ export default function Detail() {
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <span className="font-bold text-red-500 block text-xs uppercase mb-1">Author</span>
                         <span className="text-lg font-medium">{novel.author}</span>
+                    </div>
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <span className="font-bold text-red-500 block text-xs uppercase mb-1">Alternative Title</span>
+                        <span className="text-lg font-medium leading-tight font-italic">{novel.alternative_title}</span>
+                    </div>
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <span className="font-bold text-red-500 block text-xs uppercase mb-1">Status</span>
+                        <span className="text-lg font-medium">{novel.status}</span>
                     </div>
                 </div>
             )}
