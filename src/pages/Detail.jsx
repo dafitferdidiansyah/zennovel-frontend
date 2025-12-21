@@ -140,12 +140,17 @@ export default function Detail() {
                         >
                             <BookOpen size={20} className="group-hover:animate-pulse" />
                             {/* LOGIKA TEXT: Ganti text tombol */}
-                            <span>
-                                {lastRead 
-                                    ? `Continue: Ch ${lastRead.chapter_title}` // Tampilkan "Continue: Ch 5"
-                                    : "Start Reading"
-                                }
-                            </span>
+<span className="truncate">
+        {lastRead ? (
+            // LOGIKA BARU:
+            // Cek apakah ada chapter_index?
+            lastRead.chapter_index > 0 
+                ? `Continue: Ch ${lastRead.chapter_index}` // Hasil: "Continue: Ch 590"
+                : `Continue: ${lastRead.chapter_title}`    // Fallback: "Continue: Prologue"
+        ) : (
+            "Start Reading"
+        )}
+    </span>
                         </Link>
                     ) : (
                         <button disabled className="flex-1 bg-gray-300 dark:bg-gray-700 text-gray-500 py-3.5 px-6 rounded-2xl font-bold cursor-not-allowed flex justify-center items-center gap-2">

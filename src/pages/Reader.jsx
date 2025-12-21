@@ -72,7 +72,8 @@ export default function Reader() {
         cover: chap.novel_cover,     
         chapter_id: chap.id,
         chapter_title: chap.title,
-        chapter_order: chap.chapter_number, 
+        chapter_order: chap.chapter_number,
+        chapter_index: chap.chapter_index, 
         timestamp: new Date().getTime()
     };
     
