@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Flame, Clock, Zap, LogOut, User , Search} from 'lucide-react';
+import { BookOpen, Flame, Clock } from 'lucide-react';
 import { api, BASE_URL } from '../api'; 
 
 export default function Home() {
   const [data, setData] = useState({ hot: [], latest: [], completed: [], recent: [] });
   const [genres, setGenres] = useState([]);
-  const [continueReading, setContinueReading] = useState([]); // State untuk Continue Reading
+  const [continueReading, setContinueReading] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
@@ -17,7 +17,6 @@ export default function Home() {
 
     const fetchData = async () => {
         try {
-            // Ambil data Home & Genre secara paralel
             const [homeRes, genreRes] = await Promise.all([
                 api.getHomeData(token),
                 api.getGenres()
@@ -25,20 +24,16 @@ export default function Home() {
             
             const homeData = homeRes.data || {};
 
-            // --- 1. LOGIKA HYBRID CONTINUE READING ---
+            // LOGIKA HYBRID
             if (token) {
-                // A. JIKA LOGIN: Ambil dari API
                 setContinueReading(homeData.recent || []);
             } else {
-                // B. JIKA TAMU: Ambil dari LocalStorage
                 const localHistory = JSON.parse(localStorage.getItem('reading_history')) || [];
                 setContinueReading(localHistory);
             }
 
-            // --- 2. LOGIKA DATA HOME ---
             setData(homeData);
 
-            // --- 3. LOGIKA GENRE (Anti-Error) ---
             let genresData = [];
             if (Array.isArray(genreRes.data)) {
                 genresData = genreRes.data;
@@ -49,7 +44,6 @@ export default function Home() {
 
        } catch (err) {
             console.error(err);
-            // Fallback agar tidak blank
             setData({ hot: [], latest: [], completed: [], recent: [] });
             setGenres([]); 
             setContinueReading([]);
@@ -61,13 +55,6 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    setIsLoggedIn(false);
-    navigate('/login');
-  };
-
   if (loading) return <div className="text-center py-20 text-gray-400">Loading library...</div>;
 
   return (
@@ -75,6 +62,50 @@ export default function Home() {
       
       <div className="max-w-6xl mx-auto px-4 mt-6">
         
+        {/* ========================================================= */}
+        {/* [MOBILE ONLY] CONTINUE READING (HORIZONTAL SCROLL)        */}
+        {/* Posisi: Di Atas Hot Novel                                 */}
+        {/* Class 'md:hidden' artinya: HILANG saat layar Desktop      */}
+        {/* ========================================================= */}
+        {continueReading && continueReading.length > 0 && (
+          <div className="mb-8 animate-fade-in md:hidden">
+             <div className="flex items-center gap-2 mb-4 border-b border-gray-300 dark:border-gray-700 pb-2">
+                 <BookOpen className="text-purple-500" size={20} />
+                 <h2 className="text-lg font-bold uppercase text-purple-500">Continue Reading</h2>
+             </div>
+             
+             {/* Geser Samping (overflow-x-auto) */}
+             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                 {continueReading.map(item => (
+                     <Link 
+                        key={`mob-${item.id}-${item.chapter_id}`} 
+                        to={`/read/${item.id}/${item.chapter_id}`} 
+                        className="min-w-[240px] flex gap-3 p-3 bg-white dark:bg-[#232323] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-purple-500 hover:shadow-md transition group"
+                     >
+                         <div className="w-14 h-20 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0">
+                             <img 
+                                src={item.cover ? (item.cover.startsWith('http') ? item.cover : `${BASE_URL}${item.cover}`) : 'https://placehold.co/400x600?text=No+Cover'} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                                alt={item.title}
+                             />
+                         </div>
+                         <div className="flex flex-col justify-center min-w-0 flex-1">
+                             <h4 className="font-bold text-sm truncate text-gray-800 dark:text-gray-200 group-hover:text-purple-500">
+                                {item.title}
+                             </h4>
+                             <span className="text-xs text-gray-500 truncate mt-1">
+                                {item.chapter_title ? item.chapter_title : `Chapter ${item.chapter_order}`}
+                             </span>
+                             <div className="flex items-center gap-1 mt-2 text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase">
+                                <span>▶ Lanjut Baca</span>
+                             </div>
+                         </div>
+                     </Link>
+                 ))}
+             </div>
+          </div>
+        )}
+
         {/* HOT NOVEL GRID */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4 border-b border-gray-300 dark:border-gray-700 pb-2">
@@ -135,7 +166,6 @@ export default function Home() {
                             <span className="text-zen-500">{novel.author}</span>
                         </div>
                     </div>
-
                     <div className="flex items-center gap-2 mt-2">
                          <span className="text-xs text-gray-400">
                              {novel.chapter_count ? `${novel.chapter_count} Chapters` : 'No Chapter'}
@@ -147,22 +177,26 @@ export default function Home() {
             </div>
           </div>
 
-          {/* SIDEBAR (Continue Reading, Genres, Completed) */}
+          {/* SIDEBAR */}
           <div className="w-full md:w-80 space-y-8">
              
-             {/* --- 1. CONTINUE READING (NEW LOCATION) --- */}
+             {/* ========================================================= */}
+             {/* [DESKTOP ONLY] CONTINUE READING (VERTICAL LIST)           */}
+             {/* Posisi: Di Sidebar, Atas Genre                            */}
+             {/* Class 'hidden md:block' artinya: MUNCUL hanya di Desktop  */}
+             {/* ========================================================= */}
              {continueReading && continueReading.length > 0 && (
-                <div className="bg-white dark:bg-[#232323] p-4 rounded shadow-sm border border-gray-200 dark:border-gray-700">
+                <div className="hidden md:block bg-white dark:bg-[#232323] p-4 rounded shadow-sm border border-gray-200 dark:border-gray-700 animate-fade-in">
                    <div className="flex items-center gap-2 border-b border-gray-300 dark:border-gray-600 pb-2 mb-3">
                         <BookOpen className="text-purple-500" size={18} />
                         <h3 className="font-bold text-gray-800 dark:text-white">Continue Reading</h3>
                    </div>
                    
                    <div className="space-y-3">
-                       {/* Map data Continue Reading */}
-                       {continueReading.slice(0, 5).map(item => ( // Tampilkan max 5 agar tidak kepanjangan
+                       {/* List ke Bawah (Vertical) */}
+                       {continueReading.slice(0, 5).map(item => ( 
                            <Link 
-                                key={`${item.id}-${item.chapter_id}`} 
+                                key={`desk-${item.id}-${item.chapter_id}`} 
                                 to={`/read/${item.id}/${item.chapter_id}`} 
                                 className="flex gap-3 group"
                            >
@@ -187,7 +221,7 @@ export default function Home() {
                 </div>
              )}
 
-             {/* --- 2. GENRES --- */}
+             {/* Genres */}
              <div className="bg-white dark:bg-[#232323] p-4 rounded shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="font-bold border-b border-gray-300 dark:border-gray-600 pb-2 mb-3 text-gray-800 dark:text-white">Genres</h3>
                 <div className="flex flex-wrap gap-2">
@@ -205,7 +239,7 @@ export default function Home() {
                 </div>
              </div>
 
-             {/* --- 3. COMPLETED --- */}
+             {/* Completed */}
              <div className="bg-white dark:bg-[#232323] p-4 rounded shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="font-bold border-b border-gray-300 dark:border-gray-600 pb-2 mb-3 text-green-500">Novel Completed</h3>
                 <div className="space-y-3">

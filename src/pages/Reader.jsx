@@ -15,9 +15,38 @@ export default function Reader() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Settings
-  const [fontSize, setFontSize] = useState(18);
-  const [lineHeight, setLineHeight] = useState(1.8);
-  const [themeMode, setThemeMode] = useState('dark');
+ const [fontSize, setFontSize] = useState(() => {
+      // Ambil dari local storage, kalau tidak ada pakai 18
+      return parseInt(localStorage.getItem('reader_fontsize')) || 18;
+  });
+
+  // 2. Line Height (Simpan di LocalStorage)
+  const [lineHeight, setLineHeight] = useState(() => {
+      // Ambil dari local storage, kalau tidak ada pakai 1.8
+      return parseFloat(localStorage.getItem('reader_lineheight')) || 1.8;
+  });
+
+  // 3. Tema (Simpan di LocalStorage - Kode sebelumnya)
+  const [themeMode, setThemeMode] = useState(() => {
+      return localStorage.getItem('reader_theme') || 'dark';
+  });
+
+  // --- TAMBAHKAN USE EFFECT UNTUK MENYIMPAN PERUBAHAN ---
+
+  // Simpan Font Size setiap kali berubah
+  useEffect(() => {
+      localStorage.setItem('reader_fontsize', fontSize);
+  }, [fontSize]);
+
+  // Simpan Line Height setiap kali berubah
+  useEffect(() => {
+      localStorage.setItem('reader_lineheight', lineHeight);
+  }, [lineHeight]);
+
+  // Simpan Tema setiap kali berubah
+  useEffect(() => {
+      localStorage.setItem('reader_theme', themeMode);
+  }, [themeMode]);
 
   const themes = {
     light: { bg: '#F4F4F4', text: '#333', ui: '#fff', border: '#e5e7eb' },
@@ -104,22 +133,42 @@ export default function Reader() {
       />
 
       <div className="max-w-3xl mx-auto px-5 pt-24 pb-40">
+              {/* --- 1. TAMBAHKAN JUDUL DISINI (DI ATAS NAVIGASI) --- */}
+       <div className="text-center mb-12 animate-fade-in">
+           <h1 className="text-2xl md:text-3xl font-bold font-serif leading-tight mb-2">
+               {/* Logika Tampilan: "Chapter X: Judul" atau Judul saja */}
+              {chapter.novel_title}
+           </h1>
+           {/* Nama Novel (Opsional, biar makin jelas) */}
+           <p className="text-sm opacity-60 font-sans font-serif tracking-wider uppercase">
+                 {chapter.chapter_number % 1 === 0 
+                  ? `${chapter.title}` 
+                  : chapter.title}
+           </p>
+       </div>
+       {/* --------------------------------------------------- */}
          {/* NAVIGASI ATAS */}
          <div className="flex items-center gap-3 mb-10">
             <button disabled={!chapter.prev_chapter_id} onClick={() => navigate(`/read/${novelId}/${chapter.prev_chapter_id}`)} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
-                <ChevronLeft size={18}/> <span>Prev</span>
+                <ChevronLeft size={18}/> <span className="hidden md:inline">Prev</span>
             </button>
             <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-sm">
                 <List size={20} />
             </Link>
             <button disabled={!chapter.next_chapter_id} onClick={() => navigate(`/read/${novelId}/${chapter.next_chapter_id}`)} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
-                <span>Next</span> <ChevronRight size={18}/>
+                <span className="hidden md:inline">Next</span> <ChevronRight size={18}/>
             </button>
          </div>
 
          {/* CONTENT */}
+                    <h1 className="text-2xl md:text-3xl font-bold font-serif leading-tight mb-2">
+               {/* Logika Tampilan: "Chapter X: Judul" atau Judul saja */}
+               {chapter.chapter_number % 1 === 0 
+                  ? `${chapter.title}` 
+                  : chapter.title}
+           </h1>
         <div 
           className={`prose max-w-none mb-12 select-none md:select-text cursor-pointer leading-relaxed ${themeMode === 'dark' ? 'prose-invert' : ''}`}
           style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
@@ -131,23 +180,32 @@ export default function Reader() {
          <div className="flex items-center gap-3 mb-10 pt-8 border-t border-dashed border-gray-400 dark:border-gray-700">
             <button disabled={!chapter.prev_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${novelId}/${chapter.prev_chapter_id}`); }} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
-                <ChevronLeft size={18}/> <span>Prev</span>
+                <ChevronLeft size={18}/> <span className="hidden md:inline">Prev</span>
             </button>
             <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-md">
                 <List size={20} />
             </Link>
             <button disabled={!chapter.next_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${novelId}/${chapter.next_chapter_id}`); }} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
-                <span>Next</span> <ChevronRight size={18}/>
+                <span className="hidden md:inline">Next</span> <ChevronRight size={18}/>
             </button>
          </div>
 
          <CommentSection chapterId={chapter.id} />
       </div>
 
-      {/* SCROLL BUTTON */}
+{/* SCROLL BUTTON YANG SUDAH DINAMIS */}
       <div className={`fixed bottom-24 right-5 z-40 transition-all duration-500 transform ${showMenu ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-50 hover:opacity-100 hover:translate-y-0'}`}>
-          <button onClick={handleScrollAction} className="p-3 bg-gray-800/80 dark:bg-white/10 backdrop-blur-md text-white border border-gray-700 dark:border-gray-500 rounded-full shadow-xl hover:bg-zen-500 hover:border-zen-500 transition-all transform hover:scale-110">
+          <button 
+            onClick={handleScrollAction} 
+            className="p-3 backdrop-blur-md border rounded-full shadow-xl transition-all transform hover:scale-110"
+            // INI PERUBAHANNYA: Menggunakan warna dari tema aktif
+            style={{ 
+               backgroundColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : currentTheme.ui, // Transparan di dark, solid di light/sepia
+               color: currentTheme.text,
+               borderColor: currentTheme.border 
+            }}
+          >
             {showScrollTop ? <ArrowUp size={24} /> : <ArrowDown size={24} />}
           </button>
       </div>

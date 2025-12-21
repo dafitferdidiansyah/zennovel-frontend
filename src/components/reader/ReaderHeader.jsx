@@ -3,19 +3,25 @@ import { ArrowLeft, Settings } from 'lucide-react';
 
 export default function ReaderHeader({ title, chapterNumber, showMenu, setShowMenu, novelId, theme }) {
   
-  // LOGIKA BARU: Menentukan Text Header
+  // LOGIKA HEADER (DIPERBAIKI)
   const getHeaderTitle = () => {
-      // Jika chapterNumber tidak ada, pakai judul asli
+      // 1. Jika chapterNumber kosong, tampilkan judul asli
       if (chapterNumber === undefined || chapterNumber === null) return title;
 
-      // Cek apakah desimal (misal 1.5) -> Side Chapter
+      // 2. Cek Side Chapter (Angka Desimal) -> Tampilkan judul asli
       const isSideChapter = chapterNumber % 1 !== 0;
-
       if (isSideChapter) {
-          return title; // Tampilkan Judul Asli (misal: "Special Episode")
-      } else {
-          return `Chapter ${chapterNumber}`; // Tampilkan "Chapter X"
+          return title; 
+      } 
+      
+      // 3. Cek apakah judul sudah mengandung kata "Chapter" (Anti-Double)
+      // Menggunakan '?.' agar tidak error jika title belum termuat
+      if (title && title.toLowerCase().startsWith('chapter')) {
+          return title;
       }
+
+      // 4. Jika aman, format standar: "Chapter X: Judul"
+      return `Chapter ${chapterNumber}: ${title}`;
   };
 
   return (
