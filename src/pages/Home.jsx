@@ -4,7 +4,7 @@ import { BookOpen, Flame, Clock, Zap, LogOut, User , Search} from 'lucide-react'
 import { api, BASE_URL } from '../api'; 
 
 export default function Home() {
-  const [data, setData] = useState({ hot: [], latest: [], completed: [] });
+  const [data, setData] = useState({ hot: [], latest: [], completed: [], recent: [] });
   // UBAH: Inisialisasi state genres kosong
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,13 +19,25 @@ export default function Home() {
     const fetchData = async () => {
         try {
             const [homeRes, genreRes] = await Promise.all([
-                api.getHomeData(),
+                api.getHomeData(token),
                 api.getGenres()
             ]);
-            setData(homeRes.data);
-            setGenres(genreRes.data); // Set data genre dari API
-        } catch (err) {
+            const homeData = homeRes.data || {};
+
+            let genresData = [];
+            if (Array.isArray(genreRes.data)) {
+                genresData = genreRes.data;
+            } else if (genreRes.data && Array.isArray(genreRes.data.results)) {
+                genresData = genreRes.data.results;
+            }
+
+            setData(homeData);
+            setGenres(genresData);
+       } catch (err) {
             console.error(err);
+            // Fallback agar tidak blank putih jika error
+            setData({ hot: [], latest: [], completed: [], recent: [] });
+            setGenres([]); 
         } finally {
             setLoading(false);
         }
@@ -56,7 +68,7 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {data.hot.map(novel => (
+            {data.hot?.map(novel => (
               <Link to={`/novel/${novel.id}`} key={novel.id} className="group relative">
                 <div className="aspect-[2/3] overflow-hidden rounded shadow-md bg-gray-200 dark:bg-gray-800">
                    <img 
@@ -83,7 +95,7 @@ export default function Home() {
             </div>
 
             <div className="space-y-4">
-              {data.latest.map(novel => (
+              {data.latest?.map(novel => (
                 <div key={novel.id} className="flex gap-4 p-3 bg-white dark:bg-[#232323] rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
                   <div className="w-16 h-24 flex-shrink-0 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden">
                     <img src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} className="w-full h-full object-cover"/>
@@ -128,7 +140,7 @@ export default function Home() {
                 <h3 className="font-bold border-b border-gray-300 dark:border-gray-600 pb-2 mb-3 text-gray-800 dark:text-white">Genres</h3>
                 <div className="flex flex-wrap gap-2">
                    {/* UBAH: Mapping dari state genres, bukan array manual */}
-                   {genres.length > 0 ? genres.map(g => (
+                   {genres && genres.length > 0 ? genres.map(g => (
                       <Link 
                         key={g} 
                         to={`/genre/${g}`} 
@@ -146,7 +158,7 @@ export default function Home() {
              <div className="bg-white dark:bg-[#232323] p-4 rounded shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="font-bold border-b border-gray-300 dark:border-gray-600 pb-2 mb-3 text-green-500">Novel Completed</h3>
                 <div className="space-y-3">
-                   {data.completed.map(novel => (
+                   {data.completed?.map(novel => (
                       <Link to={`/novel/${novel.id}`} key={novel.id} className="flex gap-3 group">
                          <div className="w-12 h-16 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0">
                             <img src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} className="w-full h-full object-cover"/>
@@ -157,7 +169,7 @@ export default function Home() {
                          </div>
                       </Link>
                    ))}
-                   {data.completed.length === 0 && <p className="text-xs text-gray-500">No completed novels yet.</p>}
+                   {(!data.completed || data.completed.length === 0) && <p className="text-xs text-gray-500">No completed novels yet.</p>}
                 </div>
              </div>
 
