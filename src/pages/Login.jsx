@@ -16,19 +16,63 @@ export default function Login() {
     setError('');
 
     try {
+      // 1. Login ke API
       const res = await api.login({ username, password });
-      // Simpan token di LocalStorage browser
-      localStorage.setItem('access_token', res.data.access);
+      const token = res.data.access;
+
+      // 2. Simpan token & user data
+      localStorage.setItem('access_token', token);
       localStorage.setItem('refresh_token', res.data.refresh);
       
       const userData = {
-        username: username, // Mengambil variabel state 'username' dari form
-        name: username      // Samakan saja dengan username
+        username: username,
+        name: username 
       };
       localStorage.setItem("user", JSON.stringify(userData));
-      // Redirect ke Home
+
+      // --- LOGIKA SINKRONISASI HISTORY (BARU) ---
+      try {
+          // A. Ambil history local (tamu)
+          const localHistory = JSON.parse(localStorage.getItem('reading_history')) || [];
+
+          // B. Push history local ke server (Upload progress tamu ke akun)
+          // Kita pakai Promise.all agar prosesnya paralel dan cepat
+          if (localHistory.length > 0) {
+              await Promise.all(localHistory.map(item => 
+                  api.updateProgress(item.id, item.chapter_id, token)
+                     .catch(err => console.error(`Gagal sync novel ${item.title}`, err))
+              ));
+          }
+
+          // C. Pull history terbaru dari server (Download progress gabungan)
+          const serverHistoryRes = await api.getHistory(token);
+          
+          // D. Format data dari server agar sesuai format LocalStorage Frontend
+          // Pastikan field-nya cocok dengan yang dipakai di Reader.jsx/Detail.jsx
+          const mergedHistory = serverHistoryRes.data.map(h => ({
+              id: h.id,
+              title: h.title,
+              cover: h.cover, // Pastikan backend kirim full URL atau path
+              chapter_id: h.current_chapter_id,
+              chapter_title: h.current_chapter_title,
+              chapter_order: h.current_chapter_number,
+              timestamp: new Date(h.last_read_at).getTime()
+          }));
+
+          // E. Timpa LocalStorage dengan data fresh dari server
+          localStorage.setItem('reading_history', JSON.stringify(mergedHistory));
+
+      } catch (syncErr) {
+          console.error("Sinkronisasi gagal, tapi login berhasil:", syncErr);
+          // Tetap lanjut login walaupun sync error (jangan halangi user masuk)
+      }
+      // ------------------------------------------
+
+      // 3. Redirect ke Home (Reload agar state aplikasi segar)
       window.location.href = '/'; 
+
     } catch (err) {
+      console.error(err);
       setError('Username atau Password salah!');
     } finally {
       setLoading(false);

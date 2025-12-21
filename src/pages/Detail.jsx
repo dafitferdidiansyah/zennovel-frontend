@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api, BASE_URL } from '../api'; 
-import { BookOpen, Star, ArrowLeft, Eye, Check, Plus, Hash } from 'lucide-react';
+import { BookOpen, Star, ArrowLeft, Eye, Check, Plus, Hash, ArrowDownUp } from 'lucide-react';
 
 export default function Detail() {
   const { id } = useParams();
@@ -14,6 +14,10 @@ export default function Detail() {
   const [isInLibrary, setIsInLibrary] = useState(false);
   const [readChapterIds, setReadChapterIds] = useState(new Set());
   const [lastRead, setLastRead] = useState(null);
+  
+  // Sorting State: True = Oldest (1, 2, 3), False = Latest (End, ... , 1)
+  const [isOldestFirst, setIsOldestFirst] = useState(true);
+
   const token = localStorage.getItem('access_token');
 
   useEffect(() => {
@@ -30,15 +34,14 @@ export default function Detail() {
             setIsInLibrary(false);
         }
 
-
         const history = JSON.parse(localStorage.getItem('reading_history')) || [];
         
         // 1. Cari riwayat terakhir novel ini untuk tombol "Continue"
-        // Karena history pake unshift (paling baru di index 0), kita cari yang pertama ketemu
         const currentNovelHistory = history.find(h => h.id == id); // id novel
         if (currentNovelHistory) {
             setLastRead(currentNovelHistory);
         }
+        
         const readIds = new Set(
             history
             .filter(h => h.id == id)
@@ -111,7 +114,7 @@ export default function Detail() {
                 <Link to={`/genre/${novel.genre}`} className="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded border border-red-200 dark:border-red-800 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors">
                 {novel.genre}
                 </Link>                      <span className="flex items-center gap-1"><Eye size={16}/> {novel.views}</span>
-                                    <span className="flex items-center gap-1"><Star size={16} className="text-yellow-400 fill-current"/> {novel.rating}</span>
+                                        <span className="flex items-center gap-1"><Star size={16} className="text-yellow-400 fill-current"/> {novel.rating}</span>
                 </div>
                 
                 {/* RATING INTERAKTIF */}
@@ -124,7 +127,7 @@ export default function Detail() {
                     ))}
                 </div>
 
-               {/* --- TOMBOL SMART (START / CONTINUE) --- */}
+                {/* --- TOMBOL SMART (START / CONTINUE) --- */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
                     {novel.chapters?.length > 0 ? (
                         <Link 
@@ -139,7 +142,7 @@ export default function Detail() {
                             {/* LOGIKA TEXT: Ganti text tombol */}
                             <span>
                                 {lastRead 
-                                    ? `Continue: Ch ${lastRead.chapter_order}` // Tampilkan "Continue: Ch 5"
+                                    ? `Continue: Ch ${lastRead.chapter_title}` // Tampilkan "Continue: Ch 5"
                                     : "Start Reading"
                                 }
                             </span>
@@ -150,25 +153,8 @@ export default function Detail() {
                         </button>
                     )}
 
-                    <button 
-                        onClick={handleBookmark} 
-                        className={`flex-1 py-3.5 px-6 rounded-2xl font-bold text-base border-2 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-2
-                          ${isInLibrary 
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 border-transparent cursor-pointer shadow-none" 
-                            : "bg-white dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:text-red-500 dark:hover:text-red-400 shadow-sm hover:shadow-md"
-                          }`}
-                    >
-                        {isInLibrary ? (
-                            <>
-                                <Check size={20} />
-                                <span>In Library</span>
-                            </>
-                        ) : (
-                            <>
-                                <Plus size={20} />
-                                <span>Add to Library</span>
-                            </>
-                        )}
+                    <button onClick={handleBookmark} className={`flex-1 py-3.5 px-6 rounded-2xl font-bold text-base border-2 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-2 ${isInLibrary ? "bg-gray-100 dark:bg-gray-800 text-gray-400 border-transparent cursor-pointer shadow-none" : "bg-white dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:text-red-500 dark:hover:text-red-400 shadow-sm hover:shadow-md"}`}>
+                        {isInLibrary ? <><Check size={20} /><span>In Library</span></> : <><Plus size={20} /><span>Add to Library</span></>}
                     </button>
                 </div>
                 {/* --- AKHIR TOMBOL --- */}
@@ -211,12 +197,35 @@ export default function Detail() {
             )}
 
             {activeTab === 'chap' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                    {novel.chapters?.map((chap) => (
-                        <Link key={chap.id} to={`/read/${novel.id}/${chap.id}`} className="border-b border-dashed border-gray-200 dark:border-gray-700 py-3 hover:text-red-500 truncate text-sm block transition-colors">
-                            {chap.title}
-                        </Link>
-                    ))}
+                <div>
+                    {/* FILTER SORTING CHAPTER (DITAMBAHKAN) */}
+                    <div className="flex justify-end mb-2">
+                        <button 
+                            onClick={() => setIsOldestFirst(!isOldestFirst)}
+                            className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-red-500 transition-colors uppercase tracking-wider"
+                        >
+                            <ArrowDownUp size={14} />
+                            {isOldestFirst ? "Oldest" : "Latest"}
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                        {/* LOGIKA SORTING (DITAMBAHKAN) */}
+                        {novel.chapters && [...novel.chapters]
+                            .sort((a, b) => {
+                                // Mengubah "10.5" -> 10.5 (Float)
+                                const numA = parseFloat(a.chapter_number || a.order || 0); 
+                                const numB = parseFloat(b.chapter_number || b.order || 0);
+                                // Urutkan berdasarkan state
+                                return isOldestFirst ? numA - numB : numB - numA;
+                            })
+                            .map((chap) => (
+                                <Link key={chap.id} to={`/read/${novel.id}/${chap.id}`} className="border-b border-dashed border-gray-200 dark:border-gray-700 py-3 hover:text-red-500 truncate text-sm block transition-colors">
+                                    {chap.title}
+                                </Link>
+                            ))
+                        }
+                    </div>
                 </div>
             )}
         </div>

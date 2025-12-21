@@ -47,5 +47,5 @@ export const api = {
   getNovelsByTag: (tag) => axios.get(`${API_URL}/novels/?tag=${tag}`),
   getNovelsByGenre: (genre) => axios.get(`${API_URL}/novels/?genre=${genre}`),
   getGenres: () => axios.get(`${API_URL}/genres/`),
-
+  getHistory: (token) => axios.get(`${API_URL}/history/`, { headers: { Authorization: `Bearer ${token}` } }),
 };

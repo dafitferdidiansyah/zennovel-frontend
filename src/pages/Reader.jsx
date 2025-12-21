@@ -109,13 +109,13 @@ export default function Reader() {
         if (novelRes) {
             setChaptersList(novelRes.data.chapters || []);
         }
+        saveToLocalStorage(chapData);
 
         if (token) {
             api.updateProgress(chapData.novel_id, chapterId, token)
-               .catch(err => console.error("Gagal sync progress", err));
-        } else {
-            saveToLocalStorage(chapData);
+               .catch(err => console.error("Gagal sync progress ke server", err));
         }
+    }).catch(err => {
     })
     .finally(() => setLoading(false));
 
@@ -179,10 +179,10 @@ export default function Reader() {
                                     ? 'bg-zen-500 text-white' 
                                     : 'hover:opacity-70'
                                 }`}
-                             style={{ color: c.id == chapterId ? '#fff' : currentTheme.text }}
-                        >
+                             style={{ color: c.id == chapterId ? '#fff' : currentTheme.text }}>
+                        
                             <span className="truncate">
-                                {c.order % 1 === 0 ? `Chapter ${c.order}` : 'Side Story'} - {c.title}
+                                {c.title}
                             </span>
                         </button>
                     ))}
