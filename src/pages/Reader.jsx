@@ -140,10 +140,13 @@ export default function Reader() {
               {chapter.novel_title}
            </h1>
            {/* Nama Novel (Opsional, biar makin jelas) */}
-           <p className="text-sm opacity-60 font-sans font-serif tracking-wider uppercase">
-                 {chapter.chapter_number % 1 === 0 
-                  ? `${chapter.title}` 
-                  : chapter.title}
+           <p className="text-sm opacity-60 font-sans font-serif tracking-wider leading-tight">
+            {(() => {
+                 // Logika Anti-Double "Chapter" & Side Chapter TETAP AMAN
+                 if (chapter.chapter_number % 1 !== 0) return chapter.title; 
+                 if (chapter.title.toLowerCase().startsWith('chapter')) return chapter.title;
+                 return `Chapter ${chapter.chapter_number}: ${chapter.title}`;
+             })()}
            </p>
        </div>
        {/* --------------------------------------------------- */}
@@ -163,11 +166,13 @@ export default function Reader() {
          </div>
 
          {/* CONTENT */}
-                    <h1 className="text-2xl md:text-3xl font-bold font-serif leading-tight mb-2">
-               {/* Logika Tampilan: "Chapter X: Judul" atau Judul saja */}
-               {chapter.chapter_number % 1 === 0 
-                  ? `${chapter.title}` 
-                  : chapter.title}
+            <h1 className="text-2xl md:text-3xl font-bold text-zen-500 font-serif leading-tight mb-2">
+            {(() => {
+                 // Logika Anti-Double "Chapter" & Side Chapter TETAP AMAN
+                 if (chapter.chapter_number % 1 !== 0) return chapter.title; 
+                 if (chapter.title.toLowerCase().startsWith('chapter')) return chapter.title;
+                 return `Chapter ${chapter.chapter_number}: ${chapter.title}`;
+             })()}
            </h1>
         <div 
           className={`prose max-w-none mb-12 select-none md:select-text cursor-pointer leading-relaxed ${themeMode === 'dark' ? 'prose-invert' : ''}`}
