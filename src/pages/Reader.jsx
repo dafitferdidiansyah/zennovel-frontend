@@ -228,7 +228,15 @@ export default function Reader() {
          </div>
 
          {/* CONTENT */}
-            <h1 className="text-2xl md:text-3xl font-bold text-zen-500 font-serif leading-tight mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-zen-500 font-serif leading-tight mb-2"
+                style={{ 
+            // Judul kita set 1.6 kali lebih besar dari font body
+            // Misal font body 18px -> Judul jadi 28.8px
+            fontSize: `${fontSize * 1.6}px`, 
+            lineHeight: 1.2 
+    }}
+            >
+
             {(() => {
                  // Logika Anti-Double "Chapter" & Side Chapter TETAP AMAN
                  if (chapter.chapter_number % 1 !== 0) return chapter.title; 

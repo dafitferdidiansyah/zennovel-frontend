@@ -60,7 +60,7 @@ export default function SearchPage() {
                   {novels.map(novel => (
                       <Link to={`/novel/${novel.id}`} key={novel.id} className="group">
                           <div className="aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md relative">
-                              <img src={`${BASE_URL}${novel.cover}`} className="w-full h-full object-cover group-hover:scale-110 transition duration-300"/>
+                              <img src={novel.cover ? `${BASE_URL}${novel.cover}` : 'https://placehold.co/400x600'} className="w-full h-full object-cover group-hover:scale-110 transition duration-300"/>
                               <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">
                                   {novel.rating} ★
                               </div>

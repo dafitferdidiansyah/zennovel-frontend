@@ -43,9 +43,6 @@ const Navbar = ({ theme, toggleTheme }) => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors">Home</Link>
-            <Link to="/library" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors">Library</Link>
-            
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="relative">
               <input
@@ -59,6 +56,9 @@ const Navbar = ({ theme, toggleTheme }) => {
                 <Search size={16} />
               </button>
             </form>
+            <Link to="/" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors">Home</Link>
+            <Link to="/library" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors">Library</Link>
+            
 
             {/* Tombol Ganti Tema */}
             <button 

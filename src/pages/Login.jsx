@@ -56,6 +56,7 @@ export default function Login() {
               chapter_id: h.current_chapter_id,
               chapter_title: h.current_chapter_title,
               chapter_order: h.current_chapter_number,
+              chapter_index: h.current_chapter_index,
               timestamp: new Date(h.last_read_at).getTime()
           }));
 

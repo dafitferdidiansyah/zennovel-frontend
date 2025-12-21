@@ -16,7 +16,7 @@ export default function Detail() {
   const [lastRead, setLastRead] = useState(null);
   
   // Sorting State: True = Oldest (1, 2, 3), False = Latest (End, ... , 1)
-  const [isOldestFirst, setIsOldestFirst] = useState(true);
+  const [isOldestFirst, setIsOldestFirst] = useState(false);
 
   const token = localStorage.getItem('access_token');
 
@@ -192,7 +192,7 @@ export default function Detail() {
                     </div>
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <span className="font-bold text-red-500 block text-xs uppercase mb-1">Alternative Title</span>
-                        <span className="text-lg font-medium leading-tight font-italic">{novel.alternative_title}</span>
+                        <span className="text-lg font-medium leading-tight italic">{novel.alternative_title}</span>
                     </div>
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <span className="font-bold text-red-500 block text-xs uppercase mb-1">Status</span>
