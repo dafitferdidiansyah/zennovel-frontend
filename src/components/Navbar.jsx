@@ -127,7 +127,7 @@ const Navbar = ({ theme, toggleTheme }) => {
               </div>
             ) : (
               <Link to="/login" className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-transform transform hover:scale-105 shadow-md hover:shadow-red-500/30">
-                Login
+                Login/Sign Up
               </Link>
             )}
           </div>

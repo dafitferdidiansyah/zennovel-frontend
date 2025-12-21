@@ -26,15 +26,55 @@ export default function Reader() {
   };
   const currentTheme = themes[themeMode];
 
-  useEffect(() => {
-    setLoading(true); setChapter(null); window.scrollTo(0, 0);
-api.getChapter(chapterId).then(res => { 
-        setChapter(res.data); 
-        document.title = res.data.title; 
-    })
-    .finally(() => setLoading(false));
+  const saveToLocalStorage = (chap) => {
+    let history = JSON.parse(localStorage.getItem('reading_history')) || [];
+    
+    // 1. Hapus riwayat lama novel ini (supaya tidak duplikat)
+    history = history.filter(item => item.id !== chap.novel_id);
+    
+    // 2. Buat object data baru
+    const newEntry = {
+        id: chap.novel_id,
+        title: chap.novel_title,     // Dari Serializer tadi
+        cover: chap.novel_cover,     // Dari Serializer tadi
+        chapter_id: chap.id,
+        chapter_title: chap.title,
+        chapter_order: chap.chapter_number, // Atau chap.order
+        timestamp: new Date().getTime()
+    };
+    
+    // 3. Masukkan ke paling depan (Array unshift)
+    history.unshift(newEntry);
+    
+    // 4. Batasi maksimal 10 riwayat agar browser tidak berat
+    if (history.length > 10) history.pop();
+    
+    // 5. Simpan
+    localStorage.setItem('reading_history', JSON.stringify(history));
+  };
 
-  }, [chapterId]);
+useEffect(() => {
+  window.scrollTo(0, 0);
+  setLoading(true);
+  setChapter(null);
+  const token = localStorage.getItem('access_token');
+  api.getChapter(chapterId).then(res => { 
+      const chapData = res.data;
+      setChapter(chapData); 
+      document.title = chapData.title;
+
+      if (token) {
+          // A. JIKA LOGIN: Kirim ke Database Server
+          api.updateProgress(chapData.novel_id, chapterId, token)
+             .catch(err => console.error("Gagal sync progress", err));
+      } else {
+          // B. JIKA TAMU: Simpan ke LocalStorage Browser
+          saveToLocalStorage(chapData);
+      }
+      })
+      .finally(() => setLoading(false));
+
+}, [chapterId]);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
