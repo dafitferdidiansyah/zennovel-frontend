@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
-import { ChevronLeft, ChevronRight, List, ArrowUp, ArrowDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, List, ArrowUp, ArrowDown, X  } from 'lucide-react';
 import CommentSection from '../components/CommentSection';
 import ReaderHeader from '../components/reader/ReaderHeader'; 
 import ReaderFooter from '../components/reader/ReaderFooter'; 
@@ -13,6 +13,9 @@ export default function Reader() {
   const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [chaptersList, setChaptersList] = useState([]); // Daftar semua chapter
+  const [showChapterList, setShowChapterList] = useState(false); // Status buka/tutup drawer
+  const activeChapterRef = useRef(null); // Agar list otomatis scroll ke chapter saat ini
 
   // Settings
  const [fontSize, setFontSize] = useState(() => {
@@ -87,25 +90,42 @@ export default function Reader() {
     window.scrollTo(0, 0);
     setLoading(true);
     setChapter(null);
+    setShowChapterList(false); // Tutup drawer saat ganti chapter
+    
     const token = localStorage.getItem('access_token');
     
-    api.getChapter(chapterId).then(res => { 
-        const chapData = res.data;
+    // 1. Ambil Konten Chapter
+    const fetchChapter = api.getChapter(chapterId);
+
+    // 2. Ambil Daftar Chapter (Hanya jika belum ada datanya)
+    const fetchNovelList = chaptersList.length === 0 ? api.getDetail(novelId) : Promise.resolve(null);
+
+    Promise.all([fetchChapter, fetchNovelList]).then(([chapRes, novelRes]) => {
+        const chapData = chapRes.data;
         setChapter(chapData); 
         document.title = chapData.title;
 
+        // Simpan daftar chapter jika baru fetch
+        if (novelRes) {
+            setChaptersList(novelRes.data.chapters || []);
+        }
+
         if (token) {
-            // A. JIKA LOGIN: Kirim ke Database
             api.updateProgress(chapData.novel_id, chapterId, token)
                .catch(err => console.error("Gagal sync progress", err));
         } else {
-            // B. JIKA TAMU: Simpan ke LocalStorage
             saveToLocalStorage(chapData);
         }
     })
     .finally(() => setLoading(false));
 
-  }, [chapterId]);
+  }, [chapterId, novelId]);
+
+  useEffect(() => {
+    if (showChapterList && activeChapterRef.current) {
+        activeChapterRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [showChapterList]);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
@@ -132,6 +152,44 @@ export default function Reader() {
         theme={currentTheme} 
       />
 
+      {/* --- MODAL DRAWER DAFTAR CHAPTER --- */}
+      {showChapterList && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+            <div 
+                className="w-full max-w-md max-h-[80vh] rounded-xl shadow-2xl flex flex-col overflow-hidden"
+                style={{ backgroundColor: currentTheme.ui, border: `1px solid ${currentTheme.border}` }}
+            >
+                {/* Header Modal */}
+                <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: currentTheme.border }}>
+                    <h3 className="font-bold text-lg">Daftar Chapter</h3>
+                    <button onClick={() => setShowChapterList(false)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition">
+                        <X size={24} style={{ color: currentTheme.text }} />
+                    </button>
+                </div>
+
+                {/* List Chapter */}
+                <div className="flex-1 overflow-y-auto p-2">
+                    {chaptersList.map((c) => (
+                        <button
+                            key={c.id}
+                            ref={c.id == chapterId ? activeChapterRef : null}
+                            onClick={() => navigate(`/read/${novelId}/${c.id}`)}
+                            className={`w-full text-left px-4 py-3 rounded-lg mb-1 text-sm font-medium transition flex justify-between items-center
+                                ${c.id == chapterId 
+                                    ? 'bg-zen-500 text-white' 
+                                    : 'hover:opacity-70'
+                                }`}
+                             style={{ color: c.id == chapterId ? '#fff' : currentTheme.text }}
+                        >
+                            <span className="truncate">
+                                {c.order % 1 === 0 ? `Chapter ${c.order}` : 'Side Story'} - {c.title}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+      )}
       <div className="max-w-3xl mx-auto px-5 pt-24 pb-40">
               {/* --- 1. TAMBAHKAN JUDUL DISINI (DI ATAS NAVIGASI) --- */}
        <div className="text-center mb-12 animate-fade-in">
@@ -156,9 +214,12 @@ export default function Reader() {
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
                 <ChevronLeft size={18}/> <span className="hidden md:inline">Prev</span>
             </button>
-            <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-sm">
+            <button 
+                onClick={() => setShowChapterList(true)} 
+                className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-sm"
+            >
                 <List size={20} />
-            </Link>
+            </button>
             <button disabled={!chapter.next_chapter_id} onClick={() => navigate(`/read/${novelId}/${chapter.next_chapter_id}`)} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-sm">
                 <span className="hidden md:inline">Next</span> <ChevronRight size={18}/>
@@ -187,9 +248,13 @@ export default function Reader() {
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
                 <ChevronLeft size={18}/> <span className="hidden md:inline">Prev</span>
             </button>
-            <Link to={`/novel/${chapter.novel_id}`} className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-md">
+{/* Cari bagian NAVIGASI BAWAH, ganti <Link> icon List dengan ini: */}
+            <button 
+                onClick={() => setShowChapterList(true)} 
+                className="px-4 py-3 border border-gray-400 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-zen-500 hover:text-white transition shadow-md"
+            >
                 <List size={20} />
-            </Link>
+            </button>
             <button disabled={!chapter.next_chapter_id} onClick={() => { window.scrollTo(0,0); navigate(`/read/${novelId}/${chapter.next_chapter_id}`); }} 
                     className="flex-1 bg-zen-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-zen-600 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-md">
                 <span className="hidden md:inline">Next</span> <ChevronRight size={18}/>
