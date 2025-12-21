@@ -29,6 +29,21 @@ export default function Library() {
     }
   }, []);
 
+  const handleRemove = async (e, novelId) => {
+      e.preventDefault(); // Biar gak kebuka link novelnya
+      if (!window.confirm("Remove from library?")) return;
+
+      const token = localStorage.getItem('access_token');
+      try {
+          // Panggil API Toggle Bookmark (kalau sudah ada, dia akan remove)
+          await api.toggleBookmark(novelId, token);
+          
+          // Update UI: Buang novel yang dihapus dari state tanpa refresh halaman
+          setNovels(prev => prev.filter(n => n.id !== novelId));
+      } catch (err) {
+          alert("Failed to remove novel");
+      }
+  };
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');

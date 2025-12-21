@@ -58,6 +58,7 @@ const Navbar = ({ theme, toggleTheme }) => {
             </form>
             <Link to="/" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors">Home</Link>
             <Link to="/library" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors">Library</Link>
+            <Link to="/history" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors">History</Link>
             
 
             {/* Tombol Ganti Tema */}
@@ -159,11 +160,8 @@ const Navbar = ({ theme, toggleTheme }) => {
     
     <Link to="/" className="block text-gray-600 dark:text-gray-300 hover:text-red-500 py-2">Home</Link>
                 {/* Library Link */}
-            <Link 
-              to="/library" 
-              onClick={() => setIsOpen(false)} // Tutup menu utama saat diklik
-              className="fblock text-gray-600 dark:text-gray-300 hover:text-red-500 py-2"
-            > Library            </Link>
+            <Link to="/library" onClick={() => setIsOpen(false)} className="block text-gray-600 dark:text-gray-300 hover:text-red-500 py-2"> Library</Link>
+            <Link to="/history" onClick={() => setIsOpen(false)} className="block text-gray-600 dark:text-gray-300 hover:text-red-500 py-2"> History</Link>
     {/* LOGIKA LOGIN / DROPDOWN USER */}
     {isLoggedIn ? (
       <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">

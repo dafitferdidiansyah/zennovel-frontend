@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import SearchPage from "./pages/SearchPage";
 import TagPage from "./pages/TagPage";
+import History from './pages/History';
 import { useEffect, useState } from "react";
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
         <Route path="/read/:novelId/:chapterId" element={<Reader />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="history" element={<History />} />
       </Routes>
     </BrowserRouter>
   );
