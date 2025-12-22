@@ -162,7 +162,7 @@ export default function Reader() {
             >
                 {/* Header Modal */}
                 <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: currentTheme.border }}>
-                    <h3 className="font-bold text-lg">Daftar Chapter</h3>
+                    <h3 className="font-bold text-lg">Chapter List</h3>
                     <button onClick={() => setShowChapterList(false)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition">
                         <X size={24} style={{ color: currentTheme.text }} />
                     </button>

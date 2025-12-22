@@ -64,8 +64,6 @@ export default function Home() {
         
         {/* ========================================================= */}
         {/* [MOBILE ONLY] CONTINUE READING (HORIZONTAL SCROLL)        */}
-        {/* Posisi: Di Atas Hot Novel                                 */}
-        {/* Class 'md:hidden' artinya: HILANG saat layar Desktop      */}
         {/* ========================================================= */}
         {continueReading && continueReading.length > 0 && (
           <div className="mb-8 animate-fade-in md:hidden">
@@ -76,7 +74,8 @@ export default function Home() {
              
              {/* Geser Samping (overflow-x-auto) */}
              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                 {continueReading.map(item => (
+                 {/* PERBAIKAN 1: Tambahkan .slice(0, 5) agar dibatasi 5 item saja */}
+                 {continueReading.slice(0, 5).map(item => (
                      <Link 
                         key={`mob-${item.id}-${item.chapter_id}`} 
                         to={`/read/${item.id}/${item.chapter_id}`} 
@@ -90,14 +89,15 @@ export default function Home() {
                              />
                          </div>
                          <div className="flex flex-col justify-center min-w-0 flex-1">
-                             <h4 className="font-bold text-sm truncate text-gray-800 dark:text-gray-200 group-hover:text-purple-500">
+                             {/* Judul di Continue Reading Mobile juga saya rapikan sedikit */}
+                             <h4 className="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-purple-500 line-clamp-2 leading-tight">
                                 {item.title}
                              </h4>
                              <span className="text-xs text-gray-500 truncate mt-1">
                                 {item.chapter_title ? item.chapter_title : `Chapter ${item.chapter_order}`}
                              </span>
                              <div className="flex items-center gap-1 mt-2 text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase">
-                                <span>▶ Lanjut Baca</span>
+                                <span>▶ Continue</span>
                              </div>
                          </div>
                      </Link>
@@ -123,7 +123,8 @@ export default function Home() {
                    />
                    <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-br font-bold shadow-sm">HOT</div>
                 </div>
-                <h3 className="mt-2 text-sm font-bold truncate text-gray-800 dark:text-gray-200 group-hover:text-zen-500">
+                {/* Hot Novel Title */}
+                <h3 className="mt-2 text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-zen-500 line-clamp-2 leading-snug">
                     {novel.title}
                 </h3>
               </Link>
@@ -150,7 +151,8 @@ export default function Home() {
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                         <Link to={`/novel/${novel.id}`}>
-                            <h3 className="font-bold text-md truncate hover:text-zen-500 text-gray-800 dark:text-gray-200">
+                            {/* PERBAIKAN 2: Ganti 'truncate' dengan 'line-clamp-2' agar turun ke bawah */}
+                            <h3 className="font-bold text-md text-gray-800 dark:text-gray-200 hover:text-zen-500 line-clamp-2 leading-snug">
                                 {novel.title}
                             </h3>
                         </Link>
@@ -180,11 +182,7 @@ export default function Home() {
           {/* SIDEBAR */}
           <div className="w-full md:w-80 space-y-8">
              
-             {/* ========================================================= */}
-             {/* [DESKTOP ONLY] CONTINUE READING (VERTICAL LIST)           */}
-             {/* Posisi: Di Sidebar, Atas Genre                            */}
-             {/* Class 'hidden md:block' artinya: MUNCUL hanya di Desktop  */}
-             {/* ========================================================= */}
+             {/* [DESKTOP ONLY] CONTINUE READING (VERTICAL LIST) */}
              {continueReading && continueReading.length > 0 && (
                 <div className="hidden md:block bg-white dark:bg-[#232323] p-4 rounded shadow-sm border border-gray-200 dark:border-gray-700 animate-fade-in">
                    <div className="flex items-center gap-2 border-b border-gray-300 dark:border-gray-600 pb-2 mb-3">
@@ -193,7 +191,7 @@ export default function Home() {
                    </div>
                    
                    <div className="space-y-3">
-                       {/* List ke Bawah (Vertical) */}
+                       {/* List ke Bawah (Vertical) - Sudah ada slice(0,5) disini */}
                        {continueReading.slice(0, 5).map(item => ( 
                            <Link 
                                 key={`desk-${item.id}-${item.chapter_id}`} 
@@ -207,7 +205,8 @@ export default function Home() {
                                     />
                                </div>
                                <div className="flex flex-col justify-center min-w-0">
-                                   <h4 className="text-xs font-bold group-hover:text-purple-500 text-gray-800 dark:text-gray-200 line-clamp-2">
+                                   {/* Judul di sidebar juga dirapikan */}
+                                   <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-purple-500 line-clamp-2 leading-tight">
                                         {item.title}
                                    </h4>
                                    <span className="text-[10px] text-gray-500 mt-0.5 truncate">

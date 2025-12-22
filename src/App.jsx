@@ -44,13 +44,13 @@ function App() {
           {/* PERUBAHAN DISINI: Pisahkan Route Tag dan Genre */}
           <Route path="tag/:tagName" element={<TagPage />} />
           <Route path="genre/:genreName" element={<TagPage />} />
-
+          <Route path="history" element={<History />} />
           <Route path="*" element={<NotFound />} />
         </Route>
         <Route path="/read/:novelId/:chapterId" element={<Reader />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="history" element={<History />} />
+        
       </Routes>
     </BrowserRouter>
   );

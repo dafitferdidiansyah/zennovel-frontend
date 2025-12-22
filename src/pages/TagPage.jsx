@@ -41,7 +41,7 @@ export default function TagPage() {
   return (
     <div className="min-h-screen pb-20 bg-[#F4F4F4] dark:bg-[#151515] text-[#333] dark:text-[#bbb] font-sans">
       {/* NAVBAR */}
-      <nav className="bg-white dark:bg-[#232323] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm p-4">
+      <nav className="bg-white dark:bg-[#232323] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm p-4">
          <div className="max-w-6xl mx-auto flex items-center gap-4">
              <Link to="/" className="text-gray-500 hover:text-zen-500"><ArrowLeft/></Link>
              
